@@ -1,3 +1,4 @@
-from .datamaster import DataMasterOutput
+from .datamaster import DataMasterOutput, DataMasterInput
 
 out = DataMasterOutput()
+inputs = DataMasterInput()

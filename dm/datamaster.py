@@ -4,13 +4,22 @@ from .cache import DataMasterCache, DatasetStates
 
 default_filesuffix = "txt"
 
+# TODO look up in settings
+default_fileroot = "C:/tmp/play/"
+
+if not os.path.exists(default_fileroot):
+    os.makedirs(default_fileroot)
+
+
 cache = DataMasterCache()
 
 class MaybeFileName(os.PathLike):
 
     def __init__(self, name):
+        """
+        """
         # TODO look up settings
-        self._prefix = "C:/tmp/play/"
+        self._prefix = default_fileroot
         if type(name) == str:
             self._name = [name]
         else:
@@ -22,8 +31,7 @@ class MaybeFileName(os.PathLike):
             return super(MaybeFileName, self).__getattribute__(name)
         return MaybeFileName(self._name + [name])
 
-    def __fspath__(self):
-        print("Query FSPath")
+    def _get_path(self):
         if len(self._name) > 1:
             filename = '.'.join(self._name)
             datasetname = '.'.join(self._name[:-1])
@@ -31,6 +39,19 @@ class MaybeFileName(os.PathLike):
             filename = self._name[0] + "." + default_filesuffix
             datasetname = self._name[0]
         full_path = os.path.join(self._prefix, filename)
+        return full_path, datasetname
+
+    def __repr__(self):
+        full_path, datasetname = self._get_path()
+        return "DataSet: {dsn} local at {fp}".format(dsn=datasetname, fp=full_path)
+
+    def __str__(self):
+        full_path, _ = self._get_path()
+        return full_path
+
+    def __fspath__(self):
+        print("Query FSPath")
+        full_path, datasetname = self._get_path()
         # TODO - get the path portion and ensure that it exists.
         cache.create_or_update_dataset(datasetname, full_path, DatasetStates.LocalDeclared)
         return full_path
@@ -48,7 +69,6 @@ class DataMasterOutput(object):
 
     def __init__(self):
         super(DataMasterOutput, self).__init__()
-        # TODO: on setup, ensure that the path exists.
 
     def __getattribute__(self, name):
         if name.startswith("_"):
@@ -67,7 +87,15 @@ class DataMasterInput(object):
 
     def __init__(self):
         super(DataMasterInput, self).__init__()
-        # TODO: load existing data sets from the input as attributes.
+        
+        cache = DataMasterCache()
+        for dataset in cache.get_datasets():
+            setattr(self, dataset.name, dataset.name)  # todo get path
+
+    def __getattribute__(self, name):
+        if name.startswith("_"):
+            return super(DataMasterInput, self).__getattribute__(name)
+        return MaybeFileName(name)
 
 
 """

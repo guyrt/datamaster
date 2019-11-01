@@ -50,10 +50,13 @@ class DataMasterCache(object):
             data_set = self._create_dataset(conn, name)
 
         self._set_facts(data_set, conn, {'localpath': path, 'state': state})
-        # TODO TODO TODO
-        conn.execute("""
-        INSERT INTO {datasetfacts}
-        """.format(datasetfacts='datasetfacts'))
+        conn.commit()
+        return data_set
+
+    def get_datasets(self):
+        conn = check_database()
+        datasets = conn.execute("SELECT * FROM {datasets}".format(datasets='datasets'))
+        return [DataSet(d[1], d[0], d[2]) for d in datasets]
 
     def _set_facts(self, data_set, conn, facts):
         for k, v in facts.items():
@@ -62,11 +65,11 @@ class DataMasterCache(object):
     def _create_dataset(self, conn, name):
         guid = uuid.uuid4()
         conn.execute("INSERT INTO {datasets} (name, guid) VALUES ('{name}', '{guid}')".format(datasets='datasets', name=name, guid=guid))
+        conn.commit()
         return self._get_dataset(conn, name)
 
     def _get_dataset(self, conn, name):
         data_id = conn.execute("SELECT * FROM {datasets} WHERE name = '{name}'".format(datasets='datasets', name=name)).fetchone()
-        import ipdb; ipdb.set_trace()
         if data_id:
             return DataSet(data_id[1], data_id[0], data_id[2])
         return None
