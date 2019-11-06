@@ -5,6 +5,13 @@ import uuid
 local_datafile = 'C:/users/riguy/.datamaster/dbmaster.db'
 
 
+class DataSetNotFoundError(Exception):
+    pass
+
+class TooManyDataSetsFoundError(Exception):
+    pass
+
+
 class DatasetStates(object):
 
     LocalDeclared = "localdeclared"
@@ -32,6 +39,7 @@ class DataSetFacts(object):
         INSERT INTO {table}(id, key, value) VALUES ({id}, '{key}', '{value}')
         ON CONFLICT(id, key) DO UPDATE SET value='{value}'
         '''.format(table = 'datasetfacts', id=self.id, key=self.key, value=self.value))
+        conn.commit()
 
 
 class DataMasterCache(object):
@@ -39,7 +47,7 @@ class DataMasterCache(object):
     def __init__(self):
         super(DataMasterCache, self).__init__()
 
-    def create_or_update_dataset(self, name, path, state):
+    def create_or_update_dataset(self, name, path, state, calling_filename):
         """ TODO: probably accept an object here
 
         If we don't have a data set, create one. If we do, then set its path.
@@ -49,7 +57,7 @@ class DataMasterCache(object):
         if not data_set:
             data_set = self._create_dataset(conn, name)
 
-        self._set_facts(data_set, conn, {'localpath': path, 'state': state})
+        self._set_facts(data_set, conn, {'localpath': path, 'state': state, 'calling_filename': calling_filename})
         conn.commit()
         return data_set
 
@@ -57,6 +65,11 @@ class DataMasterCache(object):
         conn = check_database()
         datasets = conn.execute("SELECT * FROM {datasets}".format(datasets='datasets'))
         return [DataSet(d[1], d[0], d[2]) for d in datasets]
+
+    def set_facts_for_dataset_from_path(self, filepath, facts):
+        conn = check_database()
+        dataset = self._get_dataset_from_path(conn, filepath)
+        self._set_facts(dataset, conn, facts)
 
     def _set_facts(self, data_set, conn, facts):
         for k, v in facts.items():
@@ -73,6 +86,20 @@ class DataMasterCache(object):
         if data_id:
             return DataSet(data_id[1], data_id[0], data_id[2])
         return None
+
+    def _get_dataset_by_id(self, conn, id):
+        data_id = conn.execute("SELECT * FROM {datasets} WHERE id = {id}".format(datasets='datasets', id=id)).fetchone()
+        if data_id:
+            return DataSet(data_id[1], data_id[0], data_id[2])
+        return None
+
+    def _get_dataset_from_path(self, conn, filepath):
+        data_id = conn.execute("SELECT * FROM {datasetfacts} WHERE key = '{name}' AND value ='{value}'".format(datasetfacts='datasetfacts', name='localpath', value=filepath)).fetchall()
+        if not data_id:
+            raise DataSetNotFoundError()
+        if len(data_id) > 1:
+            raise TooManyDataSetsFoundError()
+        return self._get_dataset_by_id(conn, data_id[0][0])
 
 
 def check_database():
