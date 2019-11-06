@@ -118,15 +118,14 @@ def _get_clean_filename(iframe):
 
 """
 
-open(out.txt.dataset)  <--- format.name
 open(out.dataset.txt)  <--- name.format [feels more natural i think]
 open(out.dataset)      <--- gives just a name. no suffix at all. or .dat?
 open(out.dataset('csv'))  <--- augmentation.
 
+open(out.project.dataset.txt)   <---- allow for project. But what about 2? assume no project i think.
+
 open(in.dataset.txt)   <--- works.
 open(in.dataset)       <--- will give the default dataset type.
-open(in.dataset.parquet)  <--- looking for a parquet format of that dataset.
-
-Then support transformers (built-in pipeline units) to convert formats.
+open(in.dataset.parquet)  <--- looking for a parquet format of that dataset. Then support transformers (built-in pipeline units) to convert formats.
 
 """

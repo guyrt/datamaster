@@ -94,6 +94,7 @@ class DataMasterCache(object):
         return None
 
     def _get_dataset_from_path(self, conn, filepath):
+        """ Given path, identify a dataset that matches that path. """
         data_id = conn.execute("SELECT * FROM {datasetfacts} WHERE key = '{name}' AND value ='{value}'".format(datasetfacts='datasetfacts', name='localpath', value=filepath)).fetchall()
         if not data_id:
             raise DataSetNotFoundError()
