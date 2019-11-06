@@ -78,6 +78,7 @@ class DataMasterOutput(object):
         print(f"You requested file {name}")
         iframe = inspect.currentframe().f_back
         calling_filename = _get_clean_filename(iframe)
+        # TODO - block if it's in a state that won't allow reading (like not saved)
         return MaybeFileName(name, calling_filename)
 
 
