@@ -1,2 +1,3 @@
 watchdog
 gitpython
+peewee>=3.11
