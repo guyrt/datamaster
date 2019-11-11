@@ -1,10 +1,10 @@
 import os
 import sqlite3
 import uuid
-from peewee import Model, CharField, ForeignKeyField, SqliteDatabase
+import datetime
 
-local_datafile = 'C:/users/riguy/.datamaster/dbmaster.db'
-db = SqliteDatabase(local_datafile)
+from .models import DataSet, DataSetFact, db, local_datafile
+
 
 class DataSetNotFoundError(Exception):
     pass
@@ -13,52 +13,38 @@ class TooManyDataSetsFoundError(Exception):
     pass
 
 
-class DatasetStates(object):
-
-    LocalDeclared = "localdeclared"
-    LocalSaved = "localsaved"
-
-class DataSet(Model):
-
-    name = CharField(max_length=512)
-    project = CharField(max_length=512)
-    guid = CharField(max_length=64, unique=True)
-
-    class Meta:
-        database = db
-        indexes = (
-            (('name', 'project'), True),
-        )
-
-class DataSetFact(Model):
-
-    dataset = ForeignKeyField(DataSet, backref='facts')
-    key = CharField()
-    value = CharField()
-
-    class Meta:
-        database = db
-        indexes = (
-            (('dataset', 'key'), True),
-        )
-
-
 class DataMasterCache(object):
 
     def __init__(self):
         super(DataMasterCache, self).__init__()
 
     def get_datasets(self):
+        # TODO return only most recently updated per project/name.
         return DataSet.select()
 
     def get_dataset_byname(self, name):
         return DataSet.get(DataSet.name == name)
 
-    def get_or_create_dataset(self, name, path, project, state, calling_filename):
-        dataset, created = DataSet.get_or_create(name=name, project=project, defaults={'guid': uuid.uuid4()})
+    def get_or_create_dataset(self, name, path, project, state, calling_filename, meta_args):
+        # need to prehash the metaargs.
+        metaarg_guid = DataSet.hash_metaarg(meta_args)
+        dataset, created = DataSet.get_or_create(
+            name=name, 
+            project=project, 
+            metaarg_guid=metaarg_guid, 
+            defaults={'guid': uuid.uuid4()}
+        )
+
         params_to_update = {'calling_filename': calling_filename, 'localpath': path, 'state': state}
         self._set_facts(dataset, params_to_update)
-        
+
+        if meta_args:
+            # Meta args setting causes a file save.
+            dataset.metaargs = meta_args
+            
+        dataset.last_modified_time = datetime.datetime.now()
+        dataset.save()
+
         return dataset  # Todo verify this thing has the facts set up.
 
     def set_facts_for_dataset_from_path(self, filepath, facts):

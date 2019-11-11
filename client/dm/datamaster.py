@@ -1,12 +1,10 @@
 import os
 import inspect
 import git
-from .cache import DataMasterCache, DatasetStates
+from .cache import DataMasterCache
+from .models import DatasetStates, DataSet
+from .setting import default_fileroot
 
-default_filesuffix = "txt"
-
-# TODO look up in settings
-default_fileroot = "C:/tmp/play/"
 
 if not os.path.exists(default_fileroot):
     os.makedirs(default_fileroot)
@@ -16,58 +14,109 @@ cache = DataMasterCache()
 
 
 class ReadableFileName(os.PathLike):
+    
+    @staticmethod
+    def _create_from_model(dataset):
+        rfn = ReadableFileName(dataset.name, dataset.project)
+        local_path = dataset.get_local_filename()
+        if local_path:
+            rfn._local_path = local_path
+        return rfn
 
-    pass
+    @staticmethod
+    def _create_project(project_name):
+        rfn = ReadableFileName(project_name, None)  # todo handle nested projects
+        rfn._is_project = True
+        return rfn
+
+    def __init__(self, name, project):
+        self._prefix = default_fileroot
+        self._metaargs = {}  # These can be used to version.
+        self._is_project = False  # True iff this is not a file.
+
+        self._name = name
+        self._project = project
+        self._local_path = None
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError("This is a readabile filename, used for inputs. You can't set new arguments for it!")
+
+    def __repr__(self):
+        if self._is_project:
+            return "Project"
+        else:
+            return "Dataset {project}.{name} at {path}".format(project=self._project, name=self._name, path=self._local_path)
+
+    def __fspath__(self):
+        # eventually this will need to ensure the file is local.
+        return self._local_path # todo just look it up.
 
 
 class WriteableFileName(os.PathLike):
     """todo: class docstring"""
 
     def __init__(self, name, calling_filename):
-        # TODO look up settings
         self._prefix = default_fileroot
-        self._calling_filename = calling_filename
-        self._default_filesuffix = None
+        self._filesuffix = None
+        self._metaargs = {}  # These can be used to version.
+        self._is_project = False  # True iff this is not a file.
+
         if type(name) == str:
             self._name = [name]
         else:
             self._name = name
 
-    def __call__(self, filetype):
-        self._default_filesuffix = filetype
+        self._calling_filename = calling_filename
+
+    def __call__(self, **kwargs):
+        if 'format' in kwargs:
+            self._filesuffix = kwargs['format']
+        if 'meta' in kwargs:
+            self._metaargs = kwargs['meta']
         return self
+
+    def _set_internal_attributes(self, parent):
+        self._filesuffix = parent._filesuffix
+        self._metaargs = parent._metaargs
 
     def __getattribute__(self, name):
         """Here, name is playing the role of a new suffix."""
         if name.startswith("_"):
             return super(WriteableFileName, self).__getattribute__(name)
-        return WriteableFileName(self._name + [name], self._calling_filename)
-
-    def _get_path(self):
-        filename = self._name[-1]
-        if self._default_filesuffix:
-            filename += "." + self._default_filesuffix
-        datasetname = self._name[-1]
-        project = '.'.join(self._name[:-1])
-        full_path = os.path.join(self._prefix, os.path.join(project), filename)
-        return full_path, datasetname, project
-
-    def __repr__(self):
-        full_path, datasetname, project = self._get_path()
-        return "DataSet: {project}.{dsn} local at {fp}".format(project=project, dsn=datasetname, fp=full_path)
+        new_writeable = WriteableFileName(self._name + [name], self._calling_filename)
+        new_writeable._set_internal_attributes(self)
+        self._is_project = True
+        return new_writeable
 
     def __str__(self):
         full_path, _, _ = self._get_path()
         return full_path
+
+    def _get_path(self):
+        file_name_parts = [self._name[-1], DataSet.hash_metaarg(self._metaargs)]
+        file_name_parts = [f for f in file_name_parts if f]
+        filename = '.'.join(file_name_parts)
+        if self._filesuffix:
+            filename += "." + self._filesuffix
+        datasetname = self._name[-1]
+        project = '.'.join(self._name[:-1])
+        full_path = os.path.join(self._prefix, os.path.join(project), filename)
+        return full_path, datasetname, project
 
     def __fspath__(self):
         full_path, datasetname, project = self._get_path()
         path_part = os.path.dirname(full_path)
         if not os.path.exists(path_part):
             os.makedirs(path_part)
-        # TODO: pass project into create/update.
-        cache.get_or_create_dataset(datasetname, full_path, project, DatasetStates.LocalDeclared, self._calling_filename)
+        cache.get_or_create_dataset(datasetname, full_path, project, DatasetStates.LocalDeclared, self._calling_filename, self._metaargs)
         return full_path
+
+    def __repr__(self):
+        """ TODO - put this only in the INPUT """
+        full_path, datasetname, project = self._get_path()
+        project_print = project + "." if project else ""
+        header = "Project" if self._is_project else "Dataset" 
+        return "{header}: {project}{dsn} local at {fp} {metaargs}".format(header=header, project=project_print, dsn=datasetname, fp=full_path, metaargs=self._metaargs)
 
 
 class DataMasterOutput(object):
@@ -104,7 +153,22 @@ class DataMasterInput(object):
         
         cache = DataMasterCache()
         for dataset in cache.get_datasets():
-            setattr(self, dataset.name, WriteableFileName(dataset.name, None))  # todo get path
+            final_root = _create_project_tree(dataset, self)
+            setattr(final_root, dataset.name, ReadableFileName._create_from_model(dataset))  # todo get path, project
+
+
+def _create_project_tree(dataset : DataSet, root : DataMasterInput):
+    if not dataset.project:
+        return root
+    project_parts = dataset.project.split('.')
+    project_name = project_parts[0]
+    if not hasattr(root, project_name):
+        setattr(root, project_name, ReadableFileName._create_project(project_name))
+    current_root = getattr(root, project_name)
+    for project_name in project_parts[1:]:
+        # update - need to make ReadableFileNames if they don't have them.
+        current_root = getattr(current_root, project_name)
+    return current_root
 
 
 def _get_clean_filename(iframe):
@@ -121,6 +185,7 @@ def _get_clean_filename(iframe):
     else:
         final_path = full_path
     return os.path.basename(final_path)
+
 
 """
 open(out.project.dataset.txt)   <---- allow for project. But what about 2? assume no project i think.
