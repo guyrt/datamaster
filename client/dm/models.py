@@ -1,4 +1,4 @@
-from peewee import Model, CharField, ForeignKeyField, IntegerField, SqliteDatabase, TextField, DoesNotExist, DateTimeField
+from peewee import Model, CharField, ForeignKeyField, IntegerField, SqliteDatabase, TextField, DoesNotExist, DateTimeField, BooleanField
 import json
 import os
 import hashlib
@@ -22,7 +22,8 @@ class DataSet(Model):
     guid = CharField(max_length=64, unique=True)
     metaarg_guid = CharField(max_length=64)
     last_modified_time = DateTimeField(default=datetime.datetime.now)
-    
+    is_default = BooleanField(default=True)
+
     def __repr__(self):
         return "DataSet {id} {project}.{name}".format(id=self.id, project=self.project, name=self.name)
 

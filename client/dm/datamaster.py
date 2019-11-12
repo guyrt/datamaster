@@ -108,7 +108,8 @@ class WriteableFileName(os.PathLike):
         path_part = os.path.dirname(full_path)
         if not os.path.exists(path_part):
             os.makedirs(path_part)
-        cache.get_or_create_dataset(datasetname, full_path, project, DatasetStates.LocalDeclared, self._calling_filename, self._metaargs)
+        dataset = cache.get_or_create_dataset(datasetname, full_path, project, DatasetStates.LocalDeclared, self._calling_filename, self._metaargs)
+        cache.set_as_default(dataset)
         return full_path
 
     def __repr__(self):
@@ -152,9 +153,9 @@ class DataMasterInput(object):
         super(DataMasterInput, self).__init__()
         
         cache = DataMasterCache()
-        for dataset in cache.get_datasets():
+        for dataset in cache.get_datasets(True):
             final_root = _create_project_tree(dataset, self)
-            setattr(final_root, dataset.name, ReadableFileName._create_from_model(dataset))  # todo get path, project
+            setattr(final_root, dataset.name, ReadableFileName._create_from_model(dataset))
 
 
 def _create_project_tree(dataset : DataSet, root : DataMasterInput):

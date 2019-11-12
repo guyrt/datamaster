@@ -18,9 +18,8 @@ class DataMasterCache(object):
     def __init__(self):
         super(DataMasterCache, self).__init__()
 
-    def get_datasets(self):
-        # TODO return only most recently updated per project/name.
-        return DataSet.select()
+    def get_datasets(self, active_only=True):
+        return DataSet.select().where(DataSet.is_default==True)
 
     def get_dataset_byname(self, name):
         return DataSet.get(DataSet.name == name)
@@ -46,6 +45,13 @@ class DataMasterCache(object):
         dataset.save()
 
         return dataset  # Todo verify this thing has the facts set up.
+
+    def set_as_default(self, dataset):
+        """ Set default to true for this data set, and default to false for all others """
+        q = DataSet.update({DataSet.is_default: False}).where(DataSet.project == dataset.project and DataSet.name == dataset.name)
+        q.execute()
+        q = DataSet.update({DataSet.is_default: True}).where(DataSet.id == dataset.id)
+        q.execute()
 
     def set_facts_for_dataset_from_path(self, filepath, facts):
         dsf = DataSetFact.get(DataSetFact.key == 'localpath', DataSetFact.value == filepath)
