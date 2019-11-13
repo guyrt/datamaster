@@ -74,3 +74,5 @@ file_exists = os.path.exists(local_datafile)
 db.connect()
 if not file_exists:
     db.create_tables(models_list)
+
+cache = DataMasterCache()
