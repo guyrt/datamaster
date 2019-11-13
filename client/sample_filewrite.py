@@ -2,7 +2,7 @@ from dm import out
 
 # Write a simple file:
 f = open(out.foo, "w")
-f.write("hi")
+f.write("hello")
 f.close()
 
 # Write a simple file with a fixed output format

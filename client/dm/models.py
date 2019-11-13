@@ -4,7 +4,7 @@ import os
 import hashlib
 import datetime
 
-from .setting import default_fileroot, local_datafile
+from .settings import default_fileroot, local_datafile
 
 db = SqliteDatabase(local_datafile)
 
@@ -46,9 +46,23 @@ class DataSet(Model):
         super(DataSet, self).save(*args, **kwargs)
         _dump_metaargs(self)
 
-    def get_local_filename(self):
+    def get_fact(self, key):
         try:
-            return DataSetFact.get(dataset=self, key='localpath').value
+            return DataSetFact.get(dataset=self, key=key).value
+        except DoesNotExist:
+            return None
+
+    def get_local_filename(self):
+        return self.get_fact('localpath')
+
+    def get_metaargs_str(self):
+        """ Just get the string metaargs. Does not resolve them. """
+        try:
+            metaarg_file = DataSetFact.get(dataset=self, key='metaargfilename').value
+            if not metaarg_file:
+                return None
+            f = open(metaarg_file, 'r')
+            return f.read(50)
         except DoesNotExist:
             return None
 
@@ -72,6 +86,9 @@ class DataSetFact(Model):
     key = CharField()
     value = CharField()
 
+    def __repr__(self):
+        return "DataSetFact {dataset} {key} -> {value}".format(dataset=self.dataset.id, key=self.key, value=self.value)
+
     class Meta:
         database = db
         indexes = (
@@ -79,7 +96,12 @@ class DataSetFact(Model):
         )
 
 
+models_list = (DataSet, DataSetFact)
+
+
 def _dump_metaargs(dataset):
+    if not dataset.metaargs:
+        return
     metaargs_str = json.dumps(dataset.metaargs)
     data_filename = dataset.get_local_filename()
     if not data_filename:

@@ -3,7 +3,8 @@ import sqlite3
 import uuid
 import datetime
 
-from .models import DataSet, DataSetFact, db, local_datafile
+from .models import DataSet, DataSetFact, db, models_list
+from .settings import local_datafile
 
 
 class DataSetNotFoundError(Exception):
@@ -72,4 +73,4 @@ class DataMasterCache(object):
 file_exists = os.path.exists(local_datafile)
 db.connect()
 if not file_exists:
-    db.create_tables([DataSet, DataSetFact])
+    db.create_tables(models_list)

@@ -3,7 +3,7 @@ import inspect
 import git
 from .cache import DataMasterCache
 from .models import DatasetStates, DataSet
-from .setting import default_fileroot
+from .settings import default_fileroot
 
 
 if not os.path.exists(default_fileroot):
@@ -14,13 +14,14 @@ cache = DataMasterCache()
 
 
 class ReadableFileName(os.PathLike):
-    
+
     @staticmethod
     def _create_from_model(dataset):
         rfn = ReadableFileName(dataset.name, dataset.project)
         local_path = dataset.get_local_filename()
         if local_path:
             rfn._local_path = local_path
+        rfn._set_doc(dataset)
         return rfn
 
     @staticmethod
@@ -38,12 +39,19 @@ class ReadableFileName(os.PathLike):
         self._project = project
         self._local_path = None
 
+    def _set_doc(self, dataset):
+        metaargs = dataset.get_metaargs_str()
+        if metaargs:
+            self.__doc__ = metaargs
+        else:
+            self.__doc__ = "no metargs"
+
     def __call__(self, *args, **kwargs):
         raise NotImplementedError("This is a readabile filename, used for inputs. You can't set new arguments for it!")
 
     def __repr__(self):
         if self._is_project:
-            return "Project"
+            return "Project {project}".format(project=self._project)
         else:
             return "Dataset {project}.{name} at {path}".format(project=self._project, name=self._name, path=self._local_path)
 
@@ -186,12 +194,3 @@ def _get_clean_filename(iframe):
     else:
         final_path = full_path
     return os.path.basename(final_path)
-
-
-"""
-open(out.project.dataset.txt)   <---- allow for project. But what about 2? assume no project i think.
-
-open(in.dataset.txt)   <--- works.
-open(in.dataset)       <--- will give the default dataset type.
-open(in.dataset.parquet)  <--- looking for a parquet format of that dataset. Then support transformers (built-in pipeline units) to convert formats.
-"""
