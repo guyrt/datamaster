@@ -63,7 +63,14 @@ class WriteableFileName(os.PathLike):
         path_part = os.path.dirname(full_path)
         if not os.path.exists(path_part):
             os.makedirs(path_part)
-        dataset = cache.get_or_create_dataset(datasetname, full_path, project, DatasetStates.LocalDeclared, self._calling_filename, self._metaargs)
+        dataset = cache.get_or_create_dataset(
+            datasetname,
+            full_path,
+            project,
+            self._calling_filename,
+            self._filesuffix,
+            self._metaargs
+        )
         cache.set_as_default(dataset)
         return full_path
 

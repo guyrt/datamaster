@@ -17,7 +17,8 @@ class DMTestBase(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        for model in models_list:
+            model.delete().execute()
 
 
 test_db = SqliteDatabase(":memory:")

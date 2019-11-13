@@ -36,9 +36,8 @@ class DataSet(Model):
     def metaargs(self):
         return self._metaargs
 
-    @metaargs.setter
-    def metaargs(self, metaargs):
-        self._metaargs = metaargs
+    def update_metaargs(self, metaargs):
+        self._metaargs.update(metaargs)
         self.metaarg_guid = self.hash_metaarg(self._metaargs)
 
     def save(self, *args, **kwargs):

@@ -3,7 +3,7 @@ import sqlite3
 import uuid
 import datetime
 
-from .models import DataSet, DataSetFact, db, models_list
+from .models import DataSet, DataSetFact, db, models_list, DatasetStates
 from .settings import local_datafile
 
 
@@ -25,22 +25,26 @@ class DataMasterCache(object):
     def get_dataset_byname(self, name):
         return DataSet.get(DataSet.name == name)
 
-    def get_or_create_dataset(self, name, path, project, state, calling_filename, meta_args):
+    def get_or_create_dataset(self, name, path, project, calling_filename, file_extension, meta_args=None):
+        meta_args = meta_args or dict()
+        if file_extension:
+            meta_args['extension'] = file_extension
+
         # need to prehash the metaargs.
         metaarg_guid = DataSet.hash_metaarg(meta_args)
-        dataset, created = DataSet.get_or_create(
+        dataset, _ = DataSet.get_or_create(
             name=name, 
             project=project, 
             metaarg_guid=metaarg_guid, 
             defaults={'guid': uuid.uuid4()}
         )
 
-        params_to_update = {'calling_filename': calling_filename, 'localpath': path, 'state': state}
+        params_to_update = {'calling_filename': calling_filename, 'localpath': path, 'state': DatasetStates.LocalDeclared}
         self._set_facts(dataset, params_to_update)
 
         if meta_args:
             # Meta args setting causes a file save.
-            dataset.metaargs = meta_args
+            dataset.update_metaargs(meta_args)
             
         dataset.last_modified_time = datetime.datetime.now()
         dataset.save()
