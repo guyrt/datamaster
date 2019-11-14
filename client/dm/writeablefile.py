@@ -1,6 +1,6 @@
 import os
 from .cache import cache
-from .models import DatasetStates, DataSet
+from .models import DatasetStates, DataSet, ModelConstants
 from .settings import default_fileroot
 
 
@@ -43,6 +43,11 @@ class ReadableFileName(os.PathLike):
             self.__doc__ = metaargs
         else:
             self.__doc__ = "no metargs"
+
+    @property
+    def format(self):
+        metaargs = self._dataset.load_metaargs()
+        return metaargs.get(ModelConstants.FileFormat, '')
 
     def __call__(self, *args, **kwargs):
         # TODO - support targeting a different dataset this way.

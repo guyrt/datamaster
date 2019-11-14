@@ -15,6 +15,13 @@ class DatasetStates(object):
     LocalSaved = "localsaved"
 
 
+class ModelConstants(object):
+
+    # Stored in metaargs b/c it forms part of file uniqueness, 
+    # used to store file format.
+    FileFormat = 'extension'
+
+
 class DataSet(Model):
 
     name = CharField(max_length=512)
@@ -54,16 +61,23 @@ class DataSet(Model):
     def get_local_filename(self):
         return self.get_fact('localpath')
 
-    def get_metaargs_str(self):
+    def load_metaargs(self):
+        s = self.get_metaargs_str()
+        if not s:
+            return self.metaargs
+        metaargs_local = json.loads(s)
+        self.update_metaargs(metaargs_local)
+        return self.metaargs
+
+    def get_metaargs_str(self, charlimit=None):
         """ Just get the string metaargs. Does not resolve them. """
-        try:
-            metaarg_file = DataSetFact.get(dataset=self, key='metaargfilename').value
-            if not metaarg_file:
-                return None
-            f = open(metaarg_file, 'r')
-            return f.read(50)
-        except DoesNotExist:
+        metaarg_file = self.get_fact('metaargfilename')
+        if not metaarg_file:
             return None
+        f = open(metaarg_file, 'r')
+        if charlimit:
+            return f.read(charlimit)
+        return f.read()
 
     @staticmethod
     def hash_metaarg(metaargs):
