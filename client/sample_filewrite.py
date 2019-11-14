@@ -23,3 +23,9 @@ f = open(out.myproject.outputtwo(meta={'lr': 2e-5, 'epochs': 5}), 'w')
 f.write('out2')
 f = open(out.myproject.outputtwo(meta={'lr': 2e-5, 'epochs': 3}), 'w')
 f.write('outreplace')
+f = open(out.myproject.innerproject.outputthree(meta={'lr': 2e-5, 'epochs': 3}), 'w')
+f.write('outputthree')
+
+#
+#f = open(out.myproject.innerproject.outputone(meta={'lr': 2e-5, 'epochs': 3}), 'w')
+#f.write('outreplace')
