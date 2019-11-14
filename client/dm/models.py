@@ -62,6 +62,9 @@ class DataSet(Model):
         return self.get_fact('localpath')
 
     def load_metaargs(self):
+        """If metargs are empty then try to reload from DB."""
+        if self.metaargs:
+            return self.metaargs
         s = self.get_metaargs_str()
         if not s:
             return self.metaargs

@@ -49,6 +49,10 @@ class ReadableFileName(os.PathLike):
         metaargs = self._dataset.load_metaargs()
         return metaargs.get(ModelConstants.FileFormat, '')
 
+    @property
+    def metaargs(self):
+        return self._dataset.load_metaargs()
+
     def __call__(self, *args, **kwargs):
         # TODO - support targeting a different dataset this way.
         pass
