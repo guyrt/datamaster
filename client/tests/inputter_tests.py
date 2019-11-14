@@ -4,6 +4,7 @@ from dm.models import DataSet
 
 
 class InputTests(DMTestBase):
+    # pylint: disable=no-member
 
     def test_nested(self):
         ''' Build nested structure '''
@@ -24,6 +25,34 @@ class InputTests(DMTestBase):
         self.assertEqual(dm.inputs.p1.p2.p3.p4.p5.f6._name, 'f6')
 
         self.assertFalse(hasattr(dm.inputs.p1.p2.p3, 'fnotused'))
+
+    def test_two_with_args(self):
+        """ Given two files with metaargs, select each one by name and by default """
+
+        f1path1 = dm.out.f1(metaargs={'arg': 1}).__fspath__()
+        f1path2 = dm.out.f1(metaargs={'arg': 2}).__fspath__()
+
+        self.assertEqual(dm.inputs.f1.__fspath__(), f1path2, "Get default path by create order")
+        self.assertEqual(dm.inputs.f1().__fspath__(), f1path2, "Get default path by create order with empty call")
+        self.assertEqual(dm.inputs.f1(metaargs={'arg': 1}).__fspath__(), f1path1, "Get non default by args")
+        self.assertEqual(dm.inputs.f1(metaargs={'arg': 2}).__fspath__(), f1path2, "Get default by args")
+
+    def test_with_without_args(self):
+        """ Given with and without args, should return either. Tests both orders of create """
+        dm.out.f1().__fspath__()
+        fpath2 = dm.out.f1(metaargs={'arg': 2}).__fspath__()
+
+        self.assertEqual(dm.inputs.f1.__fspath__(), fpath2, "Get default path by create order")
+        self.assertEqual(dm.inputs.f1().__fspath__(), fpath2, "Get default path by create order")
+        self.assertEqual(dm.inputs.f1(metaargs={'arg': 2}).__fspath__(), fpath2, "Get default by args")
+
+        # Do opposite order
+        fpath3 = dm.out.f3(metaargs={'arg': 2}).__fspath__()
+        fpath4 = dm.out.f3().__fspath__()
+        
+        self.assertEqual(dm.inputs.f3.__fspath__(), fpath4, "Get default path by create order")
+        self.assertEqual(dm.inputs.f3().__fspath__(), fpath4, "Get default path by create order")
+        self.assertEqual(dm.inputs.f3(metaargs={'arg': 2}).__fspath__(), fpath3, "Get default by args")
 
 
 if __name__ == '__main__':

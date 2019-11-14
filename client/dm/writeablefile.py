@@ -53,9 +53,9 @@ class ReadableFileName(os.PathLike):
     def metaargs(self):
         return self._dataset.load_metaargs()
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, **kwargs):
         # TODO - support targeting a different dataset this way.
-        pass
+        return self
 
     def __repr__(self):
         return "Dataset {project}.{name} at {path}".format(project=self._project, name=self._name, path=self._local_path)
@@ -68,7 +68,6 @@ class ReadableFileName(os.PathLike):
 class DataMasterInput(object):
     """
     Provide paths for reading existing data.
-
     TODO:
         support a feature that wraps an existing data file. then it becomes a data file. Basically, delegate this to the output stuff.
     """
