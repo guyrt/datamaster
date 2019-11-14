@@ -66,7 +66,9 @@ class DataMasterInput(object):
 
     def __init__(self):
         super(DataMasterInput, self).__init__()
-        
+        self._reset()
+
+    def _reset(self):
         for dataset in cache.get_datasets(True):
             final_root = _create_project_tree(dataset, self)
             final_root._add_file(ReadableFileName(dataset))
@@ -92,4 +94,5 @@ def _create_project_tree(dataset : DataSet, root : DataMasterInput):
         current_root = getattr(current_root, project_name)
     return current_root
 
-
+# Global variable that should be exported as the "inputs" entrypoint
+inputs = DataMasterInput()

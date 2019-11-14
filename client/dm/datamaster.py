@@ -5,6 +5,7 @@ import os
 from .cache import cache
 from .models import DatasetStates, DataSet
 from .settings import default_fileroot
+from .writeablefile import inputs
 
 
 class WriteableFileName(os.PathLike):
@@ -72,6 +73,7 @@ class WriteableFileName(os.PathLike):
             self._metaargs
         )
         cache.set_as_default(dataset)
+        inputs._reset()
         return full_path
 
     def __repr__(self):
