@@ -79,8 +79,11 @@ class DataSet(Model):
             return None
         f = open(metaarg_file, 'r')
         if charlimit:
-            return f.read(charlimit)
-        return f.read()
+            txt = f.read(charlimit)
+        else:
+            txt = f.read()
+        f.close()
+        return txt
 
     @staticmethod
     def hash_metaarg(metaargs):

@@ -2,8 +2,9 @@ import os
 import sqlite3
 import uuid
 import datetime
+from peewee import DoesNotExist
 
-from .models import DataSet, DataSetFact, db, models_list, DatasetStates
+from .models import DataSet, DataSetFact, db, models_list, DatasetStates, ModelConstants
 from .settings import local_datafile
 
 
@@ -25,10 +26,17 @@ class DataMasterCache(object):
     def get_dataset_byname(self, name):
         return DataSet.get(DataSet.name == name)
 
+    def get_dataset_by_args(self, dataset, file_extension, meta_args):
+        """ Look up a dataset in same family but with a different file extension and/or metaargs """
+        meta_args = self._combine_args(meta_args, file_extension)
+        metaarg_guid = DataSet.hash_metaarg(meta_args)
+        try:
+            return DataSet.get(name=dataset.name, project=dataset.project, metaarg_guid=metaarg_guid)
+        except DoesNotExist:
+            return None
+
     def get_or_create_dataset(self, name, path, project, calling_filename, file_extension, meta_args=None):
-        meta_args = meta_args or dict()
-        if file_extension:
-            meta_args['extension'] = file_extension
+        meta_args = self._combine_args(meta_args, file_extension)
 
         # need to prehash the metaargs.
         metaarg_guid = DataSet.hash_metaarg(meta_args)
@@ -50,6 +58,12 @@ class DataMasterCache(object):
         dataset.save()
 
         return dataset  # Todo verify this thing has the facts set up.
+
+    def _combine_args(self, meta_args, file_extension):
+        meta_args = meta_args or dict()
+        if file_extension:
+            meta_args[ModelConstants.FileFormat] = file_extension
+        return meta_args
 
     def set_as_default(self, dataset):
         """ Set default to true for this data set, and default to false for all others """

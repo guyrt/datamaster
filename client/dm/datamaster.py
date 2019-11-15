@@ -24,11 +24,11 @@ class WriteableFileName(os.PathLike):
 
         self._calling_filename = calling_filename
 
-    def __call__(self, **kwargs):
-        if 'format' in kwargs:
-            self._filesuffix = kwargs['format']
-        if 'meta' in kwargs:
-            self._metaargs = kwargs['meta']
+    def __call__(self, format=None, meta=None):
+        if format:
+            self._filesuffix = format
+        if meta:
+            self._metaargs = meta
         return self
 
     def _set_internal_attributes(self, parent):

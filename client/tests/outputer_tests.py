@@ -55,6 +55,13 @@ class OutputTests(DMTestBase):
         self.assertEqual(dataset2.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNone(dataset2.get_fact('metaargfilename'))  # is None because we didn't declare metaargs or format
 
+    def test_create_file_with_metaargs(self):
+        t = dm.out.f1(meta={'a': 1})
+        f1path1 = t.__fspath__()
+        f1path2 = dm.out.f1(meta={'a': 2}).__fspath__()
+
+        self.assertNotEqual(f1path1, f1path2, "Different args implies different files")
+
 
 if __name__ == '__main__':
     unittest.main()

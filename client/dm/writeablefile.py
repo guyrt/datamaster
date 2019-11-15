@@ -53,9 +53,13 @@ class ReadableFileName(os.PathLike):
     def metaargs(self):
         return self._dataset.load_metaargs()
 
-    def __call__(self, **kwargs):
-        # TODO - support targeting a different dataset this way.
-        return self
+    def __call__(self, format=None, meta=None):
+        new_dataset = cache.get_dataset_by_args(self._dataset, format, meta)
+        if not new_dataset:
+            raise ValueError("No dataset found for arguments")
+        if new_dataset.id == self._dataset.id:
+            return self
+        return ReadableFileName(new_dataset)
 
     def __repr__(self):
         return "Dataset {project}.{name} at {path}".format(project=self._project, name=self._name, path=self._local_path)

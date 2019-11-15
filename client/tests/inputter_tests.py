@@ -29,30 +29,33 @@ class InputTests(DMTestBase):
     def test_two_with_args(self):
         """ Given two files with metaargs, select each one by name and by default """
 
-        f1path1 = dm.out.f1(metaargs={'arg': 1}).__fspath__()
-        f1path2 = dm.out.f1(metaargs={'arg': 2}).__fspath__()
+        f1path1 = dm.out.f1(meta={'arg': 1}).__fspath__()
+        f1path2 = dm.out.f1(meta={'arg': 2}).__fspath__()
 
+        self.assertNotEqual(f1path1, f1path2, "Sanity check that paths differ")
+
+        
         self.assertEqual(dm.inputs.f1.__fspath__(), f1path2, "Get default path by create order")
-        self.assertEqual(dm.inputs.f1().__fspath__(), f1path2, "Get default path by create order with empty call")
-        self.assertEqual(dm.inputs.f1(metaargs={'arg': 1}).__fspath__(), f1path1, "Get non default by args")
-        self.assertEqual(dm.inputs.f1(metaargs={'arg': 2}).__fspath__(), f1path2, "Get default by args")
+        self.assertRaises(ValueError, dm.inputs.f1)
+        self.assertEqual(dm.inputs.f1(meta={'arg': 1}).__fspath__(), f1path1, "Get non default by args")
+        self.assertEqual(dm.inputs.f1(meta={'arg': 2}).__fspath__(), f1path2, "Get default by args")
 
     def test_with_without_args(self):
         """ Given with and without args, should return either. Tests both orders of create """
-        dm.out.f1().__fspath__()
-        fpath2 = dm.out.f1(metaargs={'arg': 2}).__fspath__()
+        fpath1 = dm.out.f1().__fspath__()
+        fpath2 = dm.out.f1(meta={'arg': 2}).__fspath__()
 
         self.assertEqual(dm.inputs.f1.__fspath__(), fpath2, "Get default path by create order")
-        self.assertEqual(dm.inputs.f1().__fspath__(), fpath2, "Get default path by create order")
-        self.assertEqual(dm.inputs.f1(metaargs={'arg': 2}).__fspath__(), fpath2, "Get default by args")
+        self.assertEqual(dm.inputs.f1().__fspath__(), fpath1, "Get default path by create order")
+        self.assertEqual(dm.inputs.f1(meta={'arg': 2}).__fspath__(), fpath2, "Get default by args")
 
         # Do opposite order
-        fpath3 = dm.out.f3(metaargs={'arg': 2}).__fspath__()
+        fpath3 = dm.out.f3(meta={'arg': 2}).__fspath__()
         fpath4 = dm.out.f3().__fspath__()
         
         self.assertEqual(dm.inputs.f3.__fspath__(), fpath4, "Get default path by create order")
         self.assertEqual(dm.inputs.f3().__fspath__(), fpath4, "Get default path by create order")
-        self.assertEqual(dm.inputs.f3(metaargs={'arg': 2}).__fspath__(), fpath3, "Get default by args")
+        self.assertEqual(dm.inputs.f3(meta={'arg': 2}).__fspath__(), fpath3, "Get default by args")
 
 
 if __name__ == '__main__':
