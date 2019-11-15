@@ -40,6 +40,12 @@ class DataSet(Model):
         self._metaargs = dict()
 
     @property
+    def full_name(self):
+        if self.project:
+            return self.project + '.' + self.name
+        return self.name
+
+    @property
     def metaargs(self):
         return self._metaargs
 
