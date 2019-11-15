@@ -1,6 +1,6 @@
 import os
 from .datamaster import DataMasterOutput
-from .writeablefile import inputs
+from .readablefile import inputs
 from .settings import default_fileroot
 
 import atexit

@@ -14,6 +14,9 @@ class DataSetNotFoundError(Exception):
 class TooManyDataSetsFoundError(Exception):
     pass
 
+class DataSetNameCollision(Exception):
+    pass
+
 
 class DataMasterCache(object):
 
@@ -64,6 +67,13 @@ class DataMasterCache(object):
         if file_extension:
             meta_args[ModelConstants.FileFormat] = file_extension
         return meta_args
+
+    def check_project_isnt_file(self, project_name):
+        """ ensure that there isn't a file that shares name with this project """
+        project_parts = project_name.split('.')
+        project_subname = '.'.join(project_parts[:-1])
+        if DataSet.select().where(DataSet.project == project_subname and DataSet.name == project_parts[-1]).count() > 0:
+            raise DataSetNameCollision("{0} is a project and can't be used as a filename.".format(project_name))
 
     def set_as_default(self, dataset):
         """ Set default to true for this data set, and default to false for all others """

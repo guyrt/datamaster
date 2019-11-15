@@ -5,7 +5,7 @@ import os
 from .cache import cache
 from .models import DatasetStates, DataSet
 from .settings import default_fileroot
-from .writeablefile import inputs
+from .readablefile import inputs
 
 
 class WriteableFileName(os.PathLike):
@@ -61,6 +61,7 @@ class WriteableFileName(os.PathLike):
 
     def __fspath__(self):
         full_path, datasetname, project = self._get_path()
+        cache.check_project_isnt_file(project)
         path_part = os.path.dirname(full_path)
         if not os.path.exists(path_part):
             os.makedirs(path_part)

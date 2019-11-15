@@ -1,6 +1,7 @@
 from context import dm, test_db, DMTestBase
 import unittest
 from dm.models import DataSet
+from dm.cache import DataSetNameCollision
 
 
 class OutputTests(DMTestBase):
@@ -62,6 +63,17 @@ class OutputTests(DMTestBase):
 
         self.assertNotEqual(f1path1, f1path2, "Different args implies different files")
 
+    def test_declare_file_then_project_same_time_same_name_fails(self):
+        dm.out.f1.__fspath__()
+        self.assertRaises(DataSetNameCollision, dm.out.f1.f2.__fspath__)
+
+    def test_declare_file_then_project_same_later_same_name_fails(self):
+        dm.out.f1.__fspath__()
+        dm.out.p1.p2.f2.__fspath__()
+        new_out = dm.DataMasterOutput()
+        # try to make a project with original filename
+        self.assertRaises(DataSetNameCollision, new_out.f1.f2.__fspath__)
+        self.assertRaises(DataSetNameCollision, new_out.p1.p2.f2.f3.__fspath__)
 
 if __name__ == '__main__':
     unittest.main()
