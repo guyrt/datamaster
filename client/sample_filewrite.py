@@ -1,6 +1,5 @@
 from dm import out
 
-fn = out.proj.foo(format='json', timepath='2019/11').__fspath__()
 
 # Write a simple file:
 f = open(out.foo, "w")
@@ -28,6 +27,14 @@ f.write('outreplace')
 f = open(out.myproject.innerproject.outputthree(meta={'lr': 2e-5, 'epochs': 3}), 'w')
 f.write('outputthree')
 
-#
-#f = open(out.myproject.innerproject.outputone(meta={'lr': 2e-5, 'epochs': 3}), 'w')
-#f.write('outreplace')
+# With timestamps
+f = open(out.withtime.model(meta={'lr': 2e-5}, timepath='2019/11/03'), 'w')
+f.write("Nov 3")
+f = open(out.withtime.model(meta={'lr': 2e-5}, timepath='2019/11/04'), 'w')
+f.write("Nov 4")
+
+# Second copy
+f = open(out.withtime.model(timepath='2019/11/03'), 'w')
+f.write("Nov 3")
+f = open(out.withtime.model(timepath='2019/11/04'), 'w')
+f.write("Nov 4")

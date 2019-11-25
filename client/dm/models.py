@@ -33,6 +33,12 @@ class DataSet(Model):
     last_modified_time = DateTimeField(default=datetime.datetime.now)
     is_default = BooleanField(default=True)
 
+    class Meta:
+        database = db
+        indexes = (
+            (('name', 'project', 'metaarg_guid', 'timepath'), True),
+        )
+
     def __repr__(self):
         return "DataSet {id} {project}.{name}".format(id=self.id, project=self.project, name=self.name)
 
@@ -103,12 +109,6 @@ class DataSet(Model):
             return hashlib.md5(repr(sorted(metaargs.items())).encode('utf-8')).hexdigest()
         else:
             return ''
-
-    class Meta:
-        database = db
-        indexes = (
-            (('name', 'project', 'metaarg_guid'), True),
-        )
 
 
 class DataSetFact(Model):
