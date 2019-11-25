@@ -3,6 +3,7 @@ import json
 import os
 import hashlib
 import datetime
+import warnings
 
 from .settings import default_fileroot, local_datafile
 
@@ -28,6 +29,7 @@ class DataSet(Model):
     project = CharField(max_length=512)
     guid = CharField(max_length=64, unique=True)
     metaarg_guid = CharField(max_length=64)
+    timepath = CharField(max_length=64, default='')
     last_modified_time = DateTimeField(default=datetime.datetime.now)
     is_default = BooleanField(default=True)
 
@@ -83,7 +85,11 @@ class DataSet(Model):
         metaarg_file = self.get_fact('metaargfilename')
         if not metaarg_file:
             return None
-        f = open(metaarg_file, 'r')
+        try:
+            f = open(metaarg_file, 'r')
+        except FileNotFoundError:
+            warnings.warn('Metadata file not found for: {0}'.format(self.name), UserWarning)
+            return None
         if charlimit:
             txt = f.read(charlimit)
         else:

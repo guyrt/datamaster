@@ -38,15 +38,17 @@ class DataMasterCache(object):
         except DoesNotExist:
             return None
 
-    def get_or_create_dataset(self, name, path, project, calling_filename, file_extension, meta_args=None):
+    def get_or_create_dataset(self, name, path, project, calling_filename, timepath, file_extension, meta_args=None):
+        timepath = timepath or ''  # convert null to string empty.
         meta_args = self._combine_args(meta_args, file_extension)
 
         # need to prehash the metaargs.
         metaarg_guid = DataSet.hash_metaarg(meta_args)
         dataset, _ = DataSet.get_or_create(
-            name=name, 
-            project=project, 
-            metaarg_guid=metaarg_guid, 
+            name=name,
+            project=project,
+            metaarg_guid=metaarg_guid,
+            timepath=timepath,
             defaults={'guid': uuid.uuid4()}
         )
 

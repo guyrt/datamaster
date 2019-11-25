@@ -1,5 +1,7 @@
 from dm import out
 
+fn = out.proj.foo(format='json', timepath='2019/11').__fspath__()
+
 # Write a simple file:
 f = open(out.foo, "w")
 f.write("hello")

@@ -37,12 +37,14 @@ class ReadableFileName(os.PathLike):
         if local_path:
             # May be None if this is a remote file.
             self._local_path = local_path
-        
-        metaargs = dataset.get_metaargs_str()
+    
+    @property
+    def __doc__(self):
+        metaargs = self._dataset.get_metaargs_str()
         if metaargs:
-            self.__doc__ = metaargs
+            return metaargs
         else:
-            self.__doc__ = "no metargs"
+            return "no metargs"
 
     @property
     def format(self):

@@ -34,6 +34,58 @@ class OutputTests(DMTestBase):
         self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
 
+    def test_create_file_with_timefield(self):
+        file_path = dm.out.testfile(timepath='2019/11/03').__fspath__()
+        file_path = file_path.replace('\\', '/')
+        self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile'))
+        
+        self.state_check()
+        dataset = DataSet.get()
+        self.assertEqual(dataset.name, "testfile")
+        self.assertEqual(dataset.project, "")
+        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-20:], '/2019/11/03/testfile')
+        self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
+        self.assertIsNone(dataset.get_fact('metaargfilename'))
+
+    def test_create_file_with_timefield_extra_slash(self):
+        file_path = dm.out.testfile(timepath='2019/11/03/').__fspath__()
+        file_path = file_path.replace('\\', '/')
+        self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile'))
+
+        self.state_check()
+        dataset = DataSet.get()
+        self.assertEqual(dataset.name, "testfile")
+        self.assertEqual(dataset.project, "")
+        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-20:], '/2019/11/03/testfile')
+        self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
+        self.assertIsNone(dataset.get_fact('metaargfilename'))
+
+    def test_create_file_with_timefield_and_project(self):
+        file_path = dm.out.project.testfile(timepath='2019/11/03', format='json').__fspath__()
+        file_path = file_path.replace('\\', '/')
+        self.assertTrue(file_path.endswith('project/testfile/2019/11/03/testfile.json'))
+        
+        self.state_check()
+        dataset = DataSet.get()
+        self.assertEqual(dataset.name, "testfile")
+        self.assertEqual(dataset.project, "project")
+        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-25:], '/2019/11/03/testfile.json')
+        self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
+        self.assertIsNotNone(dataset.get_fact('metaargfilename'))
+
+    def test_create_file_with_timefield_and_filetype(self):
+        file_path = dm.out.testfile(timepath='2019/11/03', format='json').__fspath__()
+        file_path = file_path.replace('\\', '/')
+        self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile.json'))
+        
+        self.state_check()
+        dataset = DataSet.get()
+        self.assertEqual(dataset.name, "testfile")
+        self.assertEqual(dataset.project, "")
+        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-25:], '/2019/11/03/testfile.json')
+        self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
+        self.assertIsNotNone(dataset.get_fact('metaargfilename'))
+
     def test_create_twofiles_with_formats(self):
         file_path_json = dm.out.testfile(format='json').__fspath__()
         self.assertEqual(file_path_json[-14:], '/testfile.json')

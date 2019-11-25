@@ -16,6 +16,7 @@ class WriteableFileName(os.PathLike):
         self._filesuffix = None
         self._metaargs = {}  # These can be used to version.
         self._is_project = False  # True iff this is not a file.
+        self._timepath = None # Allows one to specify a path with timestamps.
 
         if type(name) == str:
             self._name = [name]
@@ -24,11 +25,15 @@ class WriteableFileName(os.PathLike):
 
         self._calling_filename = calling_filename
 
-    def __call__(self, format=None, meta=None):
+    def __call__(self, format=None, timepath=None, meta=None):
         if format:
             self._filesuffix = format
         if meta:
             self._metaargs = meta
+        if timepath:
+            if timepath[0] == '/':
+                raise ValueError("Time paths cannot be absolute paths.")
+            self._timepath = timepath
         return self
 
     def _set_internal_attributes(self, parent):
@@ -49,12 +54,17 @@ class WriteableFileName(os.PathLike):
         return full_path
 
     def _get_path(self):
-        file_name_parts = [self._name[-1], DataSet.hash_metaarg(self._metaargs)]
+        datasetname = self._name[-1]
+        file_name_parts = [datasetname, DataSet.hash_metaarg(self._metaargs)]
         file_name_parts = [f for f in file_name_parts if f]
-        filename = '.'.join(file_name_parts)
+
+        if self._timepath:
+            filename = os.path.join('.'.join(file_name_parts), self._timepath, datasetname)
+        else:
+            filename = '.'.join(file_name_parts)
         if self._filesuffix:
             filename += "." + self._filesuffix
-        datasetname = self._name[-1]
+
         project = '.'.join(self._name[:-1])
         full_path = os.path.join(self._prefix, os.path.join(project), filename)
         return full_path, datasetname, project
@@ -63,13 +73,17 @@ class WriteableFileName(os.PathLike):
         full_path, datasetname, project = self._get_path()
         cache.check_project_isnt_file(project)
         path_part = os.path.dirname(full_path)
+        
         if not os.path.exists(path_part):
+            # ensure that the path exists.
             os.makedirs(path_part)
+
         dataset = cache.get_or_create_dataset(
             datasetname,
             full_path,
             project,
             self._calling_filename,
+            self._timepath,
             self._filesuffix,
             self._metaargs
         )
