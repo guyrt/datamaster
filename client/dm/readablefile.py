@@ -1,5 +1,5 @@
 import os
-from .cache import cache
+from .cache import cache, get_timepaths_for_dataset
 from .models import DatasetStates, DataSet, ModelConstants
 from .settings import default_fileroot
 
@@ -30,6 +30,7 @@ class ReadableFileName(os.PathLike):
 
     def _set_info_from_model(self, dataset):
         self._dataset = dataset
+        self._timepath = dataset.timepath
         self._name = dataset.name
         self._project = dataset.project
         
@@ -41,22 +42,28 @@ class ReadableFileName(os.PathLike):
     @property
     def __doc__(self):
         metaargs = self._dataset.get_metaargs_str()
-        if metaargs:
-            return metaargs
+        timestamp_info = get_timepaths_for_dataset(self._dataset)
+        if 'allpaths' in timestamp_info:
+            print(timestamp_info)
+            timestamp_string = '\n'.join(['* ' + ts if ts == self._timepath else ts for ts in timestamp_info['allpaths']])
         else:
-            return "no metargs"
+            timestamp_string = "{cnt} total values\nMin: {min_value}\nMax: {max_value}".format(**timestamp_string)
+        if metaargs:
+            return 'Timepaths:\n{1}\nMetaargs:\n{0}'.format(metaargs, timestamp_string)
+        else:
+            return "Timepaths:\n{0}".format(timestamp_string)
 
     @property
     def format(self):
-        metaargs = self._dataset.load_metaargs()
-        return metaargs.get(ModelConstants.FileFormat, '')
+        return self.metaargs.get(ModelConstants.FileFormat, '')
 
     @property
     def metaargs(self):
         return self._dataset.load_metaargs()
 
-    def __call__(self, format=None, meta=None):
-        new_dataset = cache.get_dataset_by_args(self._dataset, format, meta)
+    def __call__(self, format=None, meta=None, timepath=''):
+        timepath = timepath or self._timepath
+        new_dataset = cache.get_dataset_by_args(self._dataset, format, meta, timepath)
         if not new_dataset:
             raise ValueError("No dataset found for arguments")
         if new_dataset.id == self._dataset.id:
@@ -64,7 +71,7 @@ class ReadableFileName(os.PathLike):
         return ReadableFileName(new_dataset)
 
     def __repr__(self):
-        return "Dataset {project}.{name} at {path}".format(project=self._project, name=self._name, path=self._local_path)
+        return "Dataset {project}.{name} at {path} ".format(project=self._project, name=self._name, path=self._local_path)
 
     def __fspath__(self):
         # eventually this will need to ensure the file is local.
@@ -107,6 +114,7 @@ def _create_project_tree(dataset : DataSet, root : DataMasterInput):
             current_root._add_project(ReadableProject(project_name))
         current_root = getattr(current_root, project_name)
     return current_root
+
 
 # Global variable that should be exported as the "inputs" entrypoint
 inputs = DataMasterInput()
