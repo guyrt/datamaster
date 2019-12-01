@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'syncer',
-    'teams'
+    'teams',
+
+    'django_extensions'
 ]
 
 MIDDLEWARE = [

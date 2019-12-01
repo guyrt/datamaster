@@ -10,7 +10,7 @@ class DataMasterModelBaseMixin(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
-    active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         abstract = True
