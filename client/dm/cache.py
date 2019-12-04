@@ -2,9 +2,11 @@ import os
 import sqlite3
 import uuid
 import datetime
+import socket
+import getpass
 from peewee import DoesNotExist, fn
 
-from .models import DataSet, DataSetFact, db, models_list, DatasetStates, ModelConstants
+from .models import DataSet, DataSetFact, db, models_list, DatasetStates, ModelConstants, DataSetFactKeys
 from .settings import local_datafile
 
 
@@ -54,13 +56,19 @@ class DataMasterCache(object):
             defaults={'guid': uuid.uuid4()}
         )
 
-        params_to_update = {'calling_filename': calling_filename, 'localpath': path, 'state': DatasetStates.LocalDeclared}
+        params_to_update = {
+            DataSetFactKeys.CallingFilename: calling_filename, 
+            DataSetFactKeys.LocalPath: path, 
+            DataSetFactKeys.State: DatasetStates.LocalDeclared,
+            DataSetFactKeys.LocalMachine: socket.getfqdn(),
+            DataSetFactKeys.LocalUsername: getpass.getuser()
+        }
         self._set_facts(dataset, params_to_update)
 
         if meta_args:
             # Meta args setting causes a file save.
             dataset.update_metaargs(meta_args)
-            
+
         dataset.last_modified_time = datetime.datetime.now()
         dataset.save()
 

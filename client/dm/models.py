@@ -23,6 +23,16 @@ class ModelConstants(object):
     FileFormat = 'extension'
 
 
+class DataSetFactKeys(object):
+    """Allowable fields for the key field in DataSetFact"""
+
+    CallingFilename = 'calling_filename'
+    LocalPath = 'localpath'
+    State = 'state'
+    LocalMachine = 'localmachine'
+    LocalUsername = 'localusername'
+
+
 class DataSet(Model):
 
     name = CharField(max_length=512)

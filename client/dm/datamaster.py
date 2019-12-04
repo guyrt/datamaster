@@ -102,11 +102,6 @@ class WriteableFileName(os.PathLike):
 class DataMasterOutput(object):
     """
     Provide paths for writing data.
-
-    TODO:
-        handle file types? Can use dot notation or can use suffix or can use
-        handle both attribute and function style, where function is for specifying stuff.
-            this should enable saving in /2019/10/11/ for instance. Needs coordination with the MaybeFileName.
     """
 
     def __init__(self):
