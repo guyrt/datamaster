@@ -137,7 +137,27 @@ class DataSetFact(Model):
         )
 
 
-models_list = (DataSet, DataSetFact)
+class DataSetRemoteSyncStates(object):
+
+    Stale = 'stale'  # Need to sync this.
+    Synced = 'synced'  # Latest change was pushed to server.
+
+
+class DataSetRemoteSync(Model):
+    """Track remote sync states"""
+
+    dataset = ForeignKeyField(DataSet, backref='serversyncs')
+    remote = CharField(default='main')  # name of the remote. For now, we only support one.
+    sync_state = CharField(default=DataSetRemoteSyncStates.Stale)  # state of this sync.
+
+    class Meta:
+        database = db
+        indexes = (
+            (('dataset', 'remote'), True),
+        )
+        
+
+models_list = (DataSet, DataSetFact, DataSetRemoteSync)
 
 
 def _dump_metaargs(dataset):

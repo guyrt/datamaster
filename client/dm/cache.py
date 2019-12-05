@@ -6,8 +6,17 @@ import socket
 import getpass
 from peewee import DoesNotExist, fn
 
-from .models import DataSet, DataSetFact, db, models_list, DatasetStates, ModelConstants, DataSetFactKeys
+from .models import (
+    DataSet, 
+    DataSetFact, 
+    db, 
+    models_list, 
+    DatasetStates, 
+    ModelConstants, 
+    DataSetFactKeys
+)
 from .settings import local_datafile
+from .syncing import create_stale_syncs
 
 
 class DataSetNotFoundError(Exception):
@@ -71,6 +80,8 @@ class DataMasterCache(object):
 
         dataset.last_modified_time = datetime.datetime.now()
         dataset.save()
+
+        create_stale_syncs(dataset)
 
         return dataset  # Todo verify this thing has the facts set up.
 
