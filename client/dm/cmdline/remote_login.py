@@ -1,8 +1,7 @@
 from getpass import getpass
 import requests
 
-# TODO - move to a common settings file.
-local_credentials_file = 'C:/users/riguy/.datamaster/token'
+from ..settings import local_credentials_file
 
 def get_server():
     # todo load from settings

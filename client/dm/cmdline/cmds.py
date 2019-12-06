@@ -2,8 +2,7 @@
 import sys
 import argparse
 
-import remote_login
-
+from .remote_login import login
 
 dm_parser = argparse.ArgumentParser(description="Data Master!")
 
@@ -12,7 +11,7 @@ dm_parser = argparse.ArgumentParser(description="Data Master!")
 _subparsers = dm_parser.add_subparsers(title="Subcommands", dest='action')
 # Login
 _login = _subparsers.add_parser("login", help="Get access credentials")
-_login.set_defaults(func=remote_login.login)
+_login.set_defaults(func=login)
 _login.add_argument("-u", "--username", dest="username", type=str, help='Remote username', required=True)
 _login.add_argument("-p", "--password", dest="password", type=str, help='Leave blank to prompt for password', required=False)
 

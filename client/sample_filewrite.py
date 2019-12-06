@@ -24,7 +24,10 @@ f = open(out.myproject.outputtwo(meta={'lr': 2e-5, 'epochs': 5}), 'w')
 f.write('out2')
 f = open(out.myproject.outputtwo(meta={'lr': 2e-5, 'epochs': 3}), 'w')
 f.write('outreplace')
-f = open(out.myproject.innerproject.outputthree(meta={'lr': 2e-5, 'epochs': 3}), 'w')
+f = open(
+    out.myproject.innerproject.outputthree(meta={'lr': 2e-5, 'epochs': 3}), 
+    'w'
+)
 f.write('outputthree')
 
 # With timestamps
@@ -38,3 +41,4 @@ f = open(out.withtime.model(timepath='2019/11/03'), 'w')
 f.write("Nov 3")
 f = open(out.withtime.model(timepath='2019/11/04'), 'w')
 f.write("Nov 4")
+
