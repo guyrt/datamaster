@@ -51,7 +51,7 @@ class DataMasterCache(object):
         except DoesNotExist:
             return None
 
-    def get_or_create_dataset(self, name, path, project, calling_filename, timepath, file_extension, meta_args=None):
+    def get_or_create_dataset(self, name, path, metadata_path, project, calling_filename, timepath, file_extension, meta_args=None):
         timepath = timepath or ''  # convert null to string empty.
         meta_args = self._combine_args(meta_args, file_extension)
 
@@ -72,10 +72,11 @@ class DataMasterCache(object):
             DataSetFactKeys.LocalMachine: socket.getfqdn(),
             DataSetFactKeys.LocalUsername: getpass.getuser()
         }
+        if meta_args:
+            params_to_update[DataSetFactKeys.MetaArgFileName] = metadata_path
         self._set_facts(dataset, params_to_update)
 
         if meta_args:
-            # Meta args setting causes a file save.
             dataset.update_metaargs(meta_args)
 
         dataset.last_modified_time = datetime.datetime.now()

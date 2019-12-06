@@ -5,6 +5,7 @@ import hashlib
 import datetime
 import warnings
 
+from .filetools import make_folder
 from .settings import default_fileroot, local_datafile
 
 db = SqliteDatabase(local_datafile)
@@ -31,6 +32,7 @@ class DataSetFactKeys(object):
     State = 'state'
     LocalMachine = 'localmachine'
     LocalUsername = 'localusername'
+    MetaArgFileName = 'metaargfilename'
 
 
 class DataSet(Model):
@@ -83,7 +85,10 @@ class DataSet(Model):
             return None
 
     def get_local_filename(self):
-        return self.get_fact('localpath')
+        return self.get_fact(DataSetFactKeys.LocalPath)
+
+    def get_metadata_filename(self):
+        return self.get_fact(DataSetFactKeys.MetaArgFileName)
 
     def load_metaargs(self):
         """If metargs are empty then try to reload from DB."""
@@ -98,7 +103,7 @@ class DataSet(Model):
 
     def get_metaargs_str(self, charlimit=None):
         """ Just get the string metaargs. Does not resolve them. """
-        metaarg_file = self.get_fact('metaargfilename')
+        metaarg_file = self.get_fact()
         if not metaarg_file:
             return None
         try:
@@ -155,7 +160,7 @@ class DataSetRemoteSync(Model):
         indexes = (
             (('dataset', 'remote'), True),
         )
-        
+
 
 models_list = (DataSet, DataSetFact, DataSetRemoteSync)
 
@@ -164,14 +169,12 @@ def _dump_metaargs(dataset):
     if not dataset.metaargs:
         return
     metaargs_str = json.dumps(dataset.metaargs)
-    data_filename = dataset.get_local_filename()
-    if not data_filename:
-        return
-    dump_filename = data_filename + "." + dataset.metaarg_guid
+    dump_filename = dataset.get_metadata_filename()
+    make_folder(dump_filename)
     f = open(dump_filename, 'w')
     f.write(metaargs_str)
     f.close()
-    dsf, created = DataSetFact.get_or_create(dataset=dataset, key='metaargfilename', defaults={'value': dump_filename})
+    dsf, created = DataSetFact.get_or_create(dataset=dataset, key=DataSetFactKeys.MetaArgFileName, defaults={'value': dump_filename})
     if not created:
         dsf.value = dump_filename
         dsf.save()
