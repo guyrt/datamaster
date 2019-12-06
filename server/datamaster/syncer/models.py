@@ -3,7 +3,6 @@ from django.db import models
 from datamaster.core_models import DataMasterModelBaseMixin
 
 
-# Create your models here.
 class ClientDataSet(DataMasterModelBaseMixin):
     """
     Record of a file created by some local system.

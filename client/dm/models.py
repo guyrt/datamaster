@@ -25,7 +25,9 @@ class ModelConstants(object):
 
 
 class DataSetFactKeys(object):
-    """Allowable fields for the key field in DataSetFact"""
+    """
+    Allowable fields for the key field in DataSetFact
+    """
 
     CallingFilename = 'calling_filename'
     LocalPath = 'localpath'
@@ -36,6 +38,9 @@ class DataSetFactKeys(object):
 
 
 class DataSet(Model):
+    """
+    Main storage module for a data file or folder created by a user.
+    """
 
     name = CharField(max_length=512)
     project = CharField(max_length=512)
@@ -48,6 +53,7 @@ class DataSet(Model):
     class Meta:
         database = db
         indexes = (
+            # Note the 4-part primary key for this object.
             (('name', 'project', 'metaarg_guid', 'timepath'), True),
         )
 
@@ -103,7 +109,7 @@ class DataSet(Model):
 
     def get_metaargs_str(self, charlimit=None):
         """ Just get the string metaargs. Does not resolve them. """
-        metaarg_file = self.get_fact()
+        metaarg_file = self.get_fact(DataSetFactKeys.MetaArgFileName)
         if not metaarg_file:
             return None
         try:

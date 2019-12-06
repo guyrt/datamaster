@@ -3,6 +3,7 @@ import sys
 import argparse
 
 from .remote_login import login
+from ..syncing import sync
 
 dm_parser = argparse.ArgumentParser(description="Data Master!")
 
@@ -17,6 +18,11 @@ _login.add_argument("-p", "--password", dest="password", type=str, help='Leave b
 
 # Remote
 _remote = _subparsers.add_parser("remote", help="Manage remote server")
+
+# Sync
+_sync = _subparsers.add_parser("sync", help="Sync to remote server")
+_sync.set_defaults(func=lambda x: sync())
+# Todo - likely want to sync to a specific remote.
 
 
 args = dm_parser.parse_args()
