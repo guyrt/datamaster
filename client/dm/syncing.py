@@ -23,9 +23,16 @@ def sync():
     Perform sync for every local, stale dataset.
     """
     need_sync = DataSetRemoteSync.select().where(DataSetRemoteSync.sync_state==DataSetRemoteSyncStates.Stale)
+    updates = 0
     for dataset_sync_state in need_sync:
         if not _push_dataset(dataset_sync_state.dataset):
             break
+        else:
+            q = DataSetRemoteSync.update({DataSetRemoteSync.sync_state: DataSetRemoteSyncStates.Synced}).where(DataSetRemoteSync.id==dataset_sync_state.id)
+            q.execute()
+            updates += 1
+    print("Updated {0}".format(updates))
+
 
 def _push_dataset(dataset):
     """ Serialize a DataSet and push to server """
