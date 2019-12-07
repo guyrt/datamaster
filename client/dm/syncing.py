@@ -1,8 +1,9 @@
+import requests
+
 from .models import DataSetRemoteSync, DataSetRemoteSyncStates
 from .serializers import DataSetSerializer
-
-
-
+from .settings import remote_server_sync_post
+from .cmdline.remote_login import retrieve_token
 
 # This is the only remote we support right now. In future, consider storing more than one.
 remotes = ['main']  
@@ -23,11 +24,20 @@ def sync():
     """
     need_sync = DataSetRemoteSync.select().where(DataSetRemoteSync.sync_state==DataSetRemoteSyncStates.Stale)
     for dataset_sync_state in need_sync:
-        _push_dataset(dataset_sync_state.dataset)
+        if not _push_dataset(dataset_sync_state.dataset):
+            break
 
 def _push_dataset(dataset):
     """ Serialize a DataSet and push to server """
-    import ipdb; ipdb.set_trace()
-    serialized_dataset = DataSetSerializer(dataset)
+    serialized_dataset = DataSetSerializer().to_json_serializable(dataset)
 
-    # add info about local machine
+    serialized_dataset['team'] = 'datamastertest'
+    serialized_dataset['user'] = 'guyrt'
+
+    headers = {'Authorization': 'Token {0}'.format(retrieve_token())}
+    
+    response = requests.post(remote_server_sync_post, data=serialized_dataset, headers=headers)
+    if response.status_code < 200 or response.status_code >= 300:
+        print(response.content)
+        return False
+    return True

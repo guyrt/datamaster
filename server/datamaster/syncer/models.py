@@ -18,17 +18,16 @@ class ClientDataSet(DataMasterModelBaseMixin):
 
     # Track a hash of the metadata arguments that were assigned to this data file.
     # Empty means no metaargs - this is not necessarily the hash of an empty string.
-    metaargs_guid = models.CharField(max_length=256, blank=False)
+    metaargs_guid = models.CharField(max_length=256, blank=True)
 
     # time path section, which acts as a forced folder path element.
-    timepath = models.CharField(max_length=256, blank=False)
+    timepath = models.CharField(max_length=256, blank=True)
 
     # dataset name: must be unique within a project.
     name = models.CharField(max_length=256)
 
     # dataset project: simple grouping of projects. Handles nesting by "."
-    # client side project can be empty, but server side project cannot.
-    project = models.CharField(max_length=1024)
+    project = models.CharField(max_length=1024, blank=True)
 
     # local path on local machine where the file was saved
     local_path = models.CharField(max_length=2048)
@@ -36,10 +35,13 @@ class ClientDataSet(DataMasterModelBaseMixin):
     # store the fully qualified name of the machine that created the file.
     local_machine_name = models.CharField(max_length=1024)
 
+    # time that object was created on local machine
+    local_machine_time = models.DateTimeField()
+
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=['team', 'user', 'metaargs_guid', 'timepath', 'name', 'project', 'local_path', 'local_machine_name'],
+            models.UniqueConstraint (
+                fields=['team', 'user', 'metaargs_guid', 'timepath', 'name', 'project'],
                 name='rowlevelunique'    
             )
         ]

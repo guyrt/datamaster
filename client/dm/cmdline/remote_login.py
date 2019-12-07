@@ -1,17 +1,21 @@
 from getpass import getpass
 import requests
 
-from ..settings import local_credentials_file
+from ..settings import local_credentials_file, remote_server
 
 def get_server():
     # todo load from settings
-    return "http://127.0.0.1:8000/gettoken/"
+    return remote_server
 
 
 def save_token(token_value):
     f = open(local_credentials_file, 'w')
     f.write(token_value)
     f.close()
+
+def retrieve_token():
+    f = open(local_credentials_file, 'r')
+    return f.read()
 
 def login(args):
     """Perform remote login based on user input args"""

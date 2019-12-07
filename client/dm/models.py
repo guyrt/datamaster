@@ -96,6 +96,9 @@ class DataSet(Model):
     def get_metadata_filename(self):
         return self.get_fact(DataSetFactKeys.MetaArgFileName)
 
+    def get_local_machine_name(self):
+        return self.get_fact(DataSetFactKeys.LocalMachine)
+
     def load_metaargs(self):
         """If metargs are empty then try to reload from DB."""
         if self.metaargs:

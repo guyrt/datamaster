@@ -69,6 +69,8 @@ class WriteableFileName(os.PathLike):
         project = '.'.join(self._name[:-1])
         full_path = os.path.join(self._prefix, os.path.join(project), DataSet.hash_metaarg(self._metaargs), filename)
         metadata_path = os.path.join(self._metadataprefix, os.path.join(project), DataSet.hash_metaarg(self._metaargs), filename)
+        full_path = os.path.normpath(full_path)
+        metadata_path = os.path.normpath(metadata_path)
         return full_path, metadata_path, datasetname, project
 
     def __fspath__(self):
