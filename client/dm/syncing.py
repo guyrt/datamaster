@@ -2,7 +2,7 @@ import requests
 
 from .models import DataSetRemoteSync, DataSetRemoteSyncStates
 from .serializers import DataSetSerializer
-from .settings import remote_server_sync_post
+from .settings import settings
 from .cmdline.remote_login import retrieve_token
 
 # This is the only remote we support right now. In future, consider storing more than one.
@@ -11,11 +11,14 @@ remotes = ['main']
 def create_stale_syncs(dataset):
     """ Creates stale syncs for all known remotes """
     for remote in remotes:
-        DataSetRemoteSync.get_or_create(
+        d, created = DataSetRemoteSync.get_or_create(
             dataset=dataset,
             remote=remote,
             defaults={'sync_state': DataSetRemoteSyncStates.Stale}
         )
+        if not created:
+            d.sync_state = DataSetRemoteSyncStates.Stale
+            d.save()
 
 
 def sync():
@@ -43,7 +46,7 @@ def _push_dataset(dataset):
 
     headers = {'Authorization': 'Token {0}'.format(retrieve_token())}
     
-    response = requests.post(remote_server_sync_post, data=serialized_dataset, headers=headers)
+    response = requests.post(settings.remote_server_sync_post, data=serialized_dataset, headers=headers)
     if response.status_code < 200 or response.status_code >= 300:
         print(response.content)
         return False

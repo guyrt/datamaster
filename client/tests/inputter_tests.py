@@ -1,4 +1,4 @@
-from context import dm, test_db, DMTestBase
+from context import dm, db, DMTestBase
 import unittest
 from dm.models import DataSet
 

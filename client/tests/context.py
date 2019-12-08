@@ -5,8 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import dm
 import unittest
 from peewee import SqliteDatabase
-from dm.models import DataSet, DataSetFact, models_list
-import dm
+from dm.models import DataSet, DataSetFact, models_list, db
 
 dm.settings.default_fileroot = ".datamastertest/"
 
@@ -21,7 +20,5 @@ class DMTestBase(unittest.TestCase):
             model.delete().execute()
 
 
-test_db = SqliteDatabase(":memory:")
-test_db.bind(models_list)
-test_db.create_tables(models_list)
-
+db.initialize(SqliteDatabase(":memory:"))
+db.create_tables(models_list)

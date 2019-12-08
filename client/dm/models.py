@@ -1,4 +1,5 @@
-from peewee import Model, CharField, ForeignKeyField, IntegerField, SqliteDatabase, TextField, DoesNotExist, DateTimeField, BooleanField
+from peewee import Model, CharField, ForeignKeyField, IntegerField, TextField, DoesNotExist, DateTimeField, BooleanField
+from peewee import DatabaseProxy
 import json
 import os
 import hashlib
@@ -6,10 +7,8 @@ import datetime
 import warnings
 
 from .filetools import make_folder
-from .settings import default_fileroot, local_datafile
 
-db = SqliteDatabase(local_datafile)
-
+db = DatabaseProxy()
 
 class DatasetStates(object):
 

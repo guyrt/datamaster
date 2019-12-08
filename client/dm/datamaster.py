@@ -5,7 +5,7 @@ import os
 from .cache import cache
 from .filetools import make_folder
 from .models import DatasetStates, DataSet
-from .settings import default_fileroot, default_metadata_fileroot
+from .settings import settings
 from .readablefile import inputs
 
 
@@ -13,8 +13,6 @@ class WriteableFileName(os.PathLike):
     """todo: class docstring"""
 
     def __init__(self, name, calling_filename):
-        self._prefix = default_fileroot
-        self._metadataprefix = default_metadata_fileroot
         self._filesuffix = None
         self._metaargs = {}  # These can be used to version.
         self._is_project = False  # True iff this is not a file.
@@ -52,7 +50,7 @@ class WriteableFileName(os.PathLike):
         return new_writeable
 
     def __str__(self):
-        full_path, _, _ = self._get_path()
+        full_path, _, _, _ = self._get_path()
         return full_path
 
     def _get_path(self):
@@ -67,8 +65,8 @@ class WriteableFileName(os.PathLike):
             filename += "." + self._filesuffix
 
         project = '.'.join(self._name[:-1])
-        full_path = os.path.join(self._prefix, os.path.join(project), DataSet.hash_metaarg(self._metaargs), filename)
-        metadata_path = os.path.join(self._metadataprefix, os.path.join(project), DataSet.hash_metaarg(self._metaargs), filename)
+        full_path = os.path.join(settings.default_fileroot, os.path.join(project), DataSet.hash_metaarg(self._metaargs), filename)
+        metadata_path = os.path.join(settings.default_metadata_fileroot, os.path.join(project), DataSet.hash_metaarg(self._metaargs), filename)
         full_path = os.path.normpath(full_path)
         metadata_path = os.path.normpath(metadata_path)
         return full_path, metadata_path, datasetname, project
@@ -91,13 +89,6 @@ class WriteableFileName(os.PathLike):
         cache.set_as_default(dataset)
         inputs._reset()
         return full_path
-
-    def __repr__(self):
-        """ TODO - put this only in the INPUT """
-        full_path, datasetname, project = self._get_path()
-        project_print = project + "." if project else ""
-        header = "Project" if self._is_project else "Dataset" 
-        return "{header}: {project}{dsn} local at {fp} {metaargs}".format(header=header, project=project_print, dsn=datasetname, fp=full_path, metaargs=self._metaargs)
 
 
 class DataMasterOutput(object):

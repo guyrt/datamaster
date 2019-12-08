@@ -38,6 +38,8 @@ class ClientDataSet(DataMasterModelBaseMixin):
     # time that object was created on local machine
     local_machine_time = models.DateTimeField()
 
+    is_public = models.BoolField(default=False)
+
     class Meta:
         constraints = [
             models.UniqueConstraint (

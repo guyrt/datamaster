@@ -1,7 +1,6 @@
 import os
 from .cache import cache, get_timepaths_for_dataset
 from .models import DatasetStates, DataSet, ModelConstants
-from .settings import default_fileroot
 
 
 class ReadableProject(object):
@@ -22,7 +21,6 @@ class ReadableProject(object):
 class ReadableFileName(os.PathLike):
 
     def __init__(self, dataset):
-        self._prefix = default_fileroot
         self._local_path = ''
         self._metaargs = {}  # These can be used to version.
 

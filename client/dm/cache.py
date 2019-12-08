@@ -4,7 +4,7 @@ import uuid
 import datetime
 import socket
 import getpass
-from peewee import DoesNotExist, fn
+from peewee import DoesNotExist, fn, SqliteDatabase
 
 from .models import (
     DataSet, 
@@ -15,7 +15,7 @@ from .models import (
     ModelConstants, 
     DataSetFactKeys
 )
-from .settings import local_datafile
+from .settings import settings
 from .syncing import create_stale_syncs
 
 
@@ -135,9 +135,9 @@ def get_timepaths_for_dataset(dataset, limit=10):
 
 
 # runs on startup
+file_exists = os.path.exists(settings.local_datafile)
+db.initialize(SqliteDatabase(settings.local_datafile))
 
-file_exists = os.path.exists(local_datafile)
-db.connect()
 if not file_exists:
     db.create_tables(models_list)
 
