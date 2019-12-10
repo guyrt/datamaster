@@ -117,6 +117,13 @@ class OutputTests(DMTestBase):
 
         self.assertNotEqual(f1path1, f1path2, "Different args implies different files")
 
+    def test_create_file_with_metaargs_same_but_diff_order(self):
+        t = dm.out.f1(meta={'a': 1, 'b': 2e-5})
+        f1path1 = t.__fspath__()
+        f1path2 = dm.out.f1(meta={'b': 2e-5, 'a': 1}).__fspath__()
+
+        self.assertEqual(f1path1, f1path2, "Same args implies same files")
+
     def test_declare_file_then_project_same_time_same_name_fails(self):
         dm.out.f1.__fspath__()
         self.assertRaises(DataSetNameCollision, dm.out.f1.f2.__fspath__)

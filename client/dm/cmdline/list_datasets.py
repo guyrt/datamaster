@@ -22,14 +22,14 @@ def _datasets_to_string(dataset_grouping):
     for project, datasets in dataset_grouping.items():
         s += "Project: {0}\n".format(project)
         for dataset_name, dataset_objs in datasets.items():
-            s += "\t{0}\n".format(dataset_name)
+            s += "  {0}\n".format(dataset_name)
             for dataset_obj in dataset_objs:
-                s += "\t\t{0}\n".format(_single_dataset_to_string(dataset_obj))
+                s += "    {0}\n".format(_single_dataset_to_string(dataset_obj))
         s += "\n"
     return s
 
 def _single_dataset_to_string(dataset):
-    s = "*** " if dataset.is_default else "    "
+    s = "* " if dataset.is_default else "  "
     s += dataset.get_local_filename()
     return s
 

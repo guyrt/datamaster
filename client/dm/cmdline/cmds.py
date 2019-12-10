@@ -4,6 +4,7 @@ import argparse
 
 from .remote_login import login
 from ..syncing import sync
+from .list_datasets import list_datasets
 
 dm_parser = argparse.ArgumentParser(description="Data Master!")
 
@@ -24,9 +25,13 @@ _sync = _subparsers.add_parser("sync", help="Sync to remote server")
 _sync.set_defaults(func=lambda x: sync())
 # Todo - likely want to sync to a specific remote.
 
+# List
+_list = _subparsers.add_parser("list", help="List local datasets")
+_list.set_defaults(func=lambda x: list_datasets())
 
 args = dm_parser.parse_args()
-if not vars(args):
+
+if not vars(args) or not args.action:
     dm_parser.print_help()
     sys.exit(0)
 
