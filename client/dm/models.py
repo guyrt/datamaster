@@ -7,6 +7,7 @@ import datetime
 import warnings
 
 from .filetools import make_folder
+from .settings import default_branch
 
 db = DatabaseProxy()
 
@@ -36,6 +37,26 @@ class DataSetFactKeys(object):
     MetaArgFileName = 'metaargfilename'
 
 
+class BranchSyncableState(object):
+
+    Sync = "sync"
+    LocalOnly = "localonly"
+
+
+class Branch(Model):
+    """ Track metadata information about a branch. Generally, git's structure should rule here. 
+    
+    While we store the fact that a branch exists here, the active branch for a context is stored
+    in a file in the context root.
+    """
+
+    name = CharField(primary_key=True)
+    syncable_state = CharField(default=BranchSyncableState.LocalOnly)
+
+    class Meta:
+        database = db
+
+
 class DataSet(Model):
     """
     Main storage module for a data file or folder created by a user.
@@ -43,9 +64,11 @@ class DataSet(Model):
 
     name = CharField(max_length=512)
     project = CharField(max_length=512)
-    guid = CharField(max_length=64, unique=True)
     metaarg_guid = CharField(max_length=64)
     timepath = CharField(max_length=64, default='')
+    branch = ForeignKeyField(Branch, backref='datasets', field='name')
+
+    guid = CharField(max_length=64, unique=True)
     last_modified_time = DateTimeField(default=datetime.datetime.now)
     is_default = BooleanField(default=True)
 
@@ -53,7 +76,7 @@ class DataSet(Model):
         database = db
         indexes = (
             # Note the 4-part primary key for this object.
-            (('name', 'project', 'metaarg_guid', 'timepath'), True),
+            (('branch', "project", 'name', 'metaarg_guid', 'timepath'), True),
         )
 
     def __repr__(self):
@@ -170,7 +193,7 @@ class DataSetRemoteSync(Model):
         )
 
 
-models_list = (DataSet, DataSetFact, DataSetRemoteSync)
+models_list = (DataSet, DataSetFact, DataSetRemoteSync, Branch)
 
 
 def _dump_metaargs(dataset):
@@ -187,3 +210,8 @@ def _dump_metaargs(dataset):
         dsf.value = dump_filename
         dsf.save()
     return dsf
+
+
+def bootstrap_database(db_instance):
+    db_instance.create_tables(models_list)
+    Branch.create(name=default_branch)

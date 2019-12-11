@@ -31,6 +31,7 @@ class ReadableFileName(os.PathLike):
         self._timepath = dataset.timepath
         self._name = dataset.name
         self._project = dataset.project
+        self._branch = dataset.branch
         
         local_path = dataset.get_local_filename()
         if local_path:
@@ -41,15 +42,16 @@ class ReadableFileName(os.PathLike):
     def __doc__(self):
         metaargs = self._dataset.get_metaargs_str()
         timestamp_info = get_timepaths_for_dataset(self._dataset)
+        branch_name = self._branch.name
         if 'allpaths' in timestamp_info:
             print(timestamp_info)
             timestamp_string = '\n'.join(['* ' + ts if ts == self._timepath else ts for ts in timestamp_info['allpaths']])
         else:
             timestamp_string = "{cnt} total values\nMin: {min_value}\nMax: {max_value}".format(**timestamp_string)
         if metaargs:
-            return 'Timepaths:\n{1}\nMetaargs:\n{0}'.format(metaargs, timestamp_string)
+            return 'Branch:{2}\nTimepaths:\n{1}\nMetaargs:\n{0}'.format(metaargs, timestamp_string, branch_name)
         else:
-            return "Timepaths:\n{0}".format(timestamp_string)
+            return "Branch:{1}\nTimepaths:\n{0}".format(timestamp_string, branch_name)
 
     @property
     def format(self):

@@ -5,7 +5,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import dm
 import unittest
 from peewee import SqliteDatabase
-from dm.models import DataSet, DataSetFact, models_list, db
+from dm.models import DataSet, DataSetFact, Branch, models_list, db, bootstrap_database
+from dm.settings import default_branch
 
 dm.settings.default_fileroot = ".datamastertest/"
 
@@ -18,7 +19,8 @@ class DMTestBase(unittest.TestCase):
     def tearDown(self):
         for model in models_list:
             model.delete().execute()
+        Branch.create(name=default_branch)
 
 
 db.initialize(SqliteDatabase(":memory:"))
-db.create_tables(models_list)
+bootstrap_database(db)

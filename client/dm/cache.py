@@ -7,15 +7,17 @@ import getpass
 from peewee import DoesNotExist, fn, SqliteDatabase
 
 from .models import (
-    DataSet, 
+    Branch,
+    DataSet,
     DataSetFact, 
     db, 
     models_list, 
     DatasetStates, 
     ModelConstants, 
-    DataSetFactKeys
+    DataSetFactKeys,
+    bootstrap_database
 )
-from .settings import settings
+from .settings import settings, default_branch
 from .syncing import create_stale_syncs
 
 
@@ -36,18 +38,24 @@ class DataMasterCache(object):
     def __init__(self):
         super(DataMasterCache, self).__init__()
 
+    def get_or_create_branch(self, name):
+        return Branch.get_or_create(name=name)[0]
+
     def get_datasets(self, active_only=True):
-        return DataSet.select().where(DataSet.is_default==True)
+        active_branch = settings.active_branch
+        return DataSet.select().where(DataSet.is_default==True and DataSet.branch==active_branch)
 
     def get_dataset_byname(self, name):
         return DataSet.get(DataSet.name == name)
 
     def get_dataset_by_args(self, dataset, file_extension, meta_args, timepath):
-        """ Look up a dataset in same family but with a different file extension and/or metaargs """
+        """ Look up a dataset in same family but with a different file extension and/or metaargs 
+        Should maintain branch of the dataset.
+        """
         meta_args = self._combine_args(meta_args, file_extension)
         metaarg_guid = DataSet.hash_metaarg(meta_args)
         try:
-            return DataSet.get(name=dataset.name, project=dataset.project, timepath=timepath, metaarg_guid=metaarg_guid)
+            return DataSet.get(name=dataset.name, project=dataset.project, timepath=timepath, metaarg_guid=metaarg_guid, branch=dataset.branch)
         except DoesNotExist:
             return None
 
@@ -62,6 +70,7 @@ class DataMasterCache(object):
             project=project,
             metaarg_guid=metaarg_guid,
             timepath=timepath,
+            branch=settings.active_branch,
             defaults={'guid': uuid.uuid4()}
         )
 
@@ -100,8 +109,10 @@ class DataMasterCache(object):
             raise DataSetNameCollision("{0} is a project and can't be used as a filename.".format(project_name))
 
     def set_as_default(self, dataset):
-        """ Set default to true for this data set, and default to false for all others """
-        q = DataSet.update({DataSet.is_default: False}).where(DataSet.project == dataset.project and DataSet.name == dataset.name)
+        """ Set default to true for this data set, and default to false for all others on branch. """
+        q = DataSet.update({DataSet.is_default: False}).where(
+            DataSet.project == dataset.project and DataSet.name == dataset.name and DataSet.branch == dataset.branch
+        )
         q.execute()
         q = DataSet.update({DataSet.is_default: True}).where(DataSet.id == dataset.id)
         q.execute()
@@ -139,6 +150,6 @@ file_exists = os.path.exists(settings.local_datafile)
 db.initialize(SqliteDatabase(settings.local_datafile))
 
 if not file_exists:
-    db.create_tables(models_list)
+    bootstrap_database(db)
 
 cache = DataMasterCache()

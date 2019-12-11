@@ -20,6 +20,7 @@ class OutputTests(DMTestBase):
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "")
+        self.assertEqual(dataset.branch.name, "master")
         self.assertEqual(os.path.split(dataset.get_fact('localpath'))[1], 'testfile')
         self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNone(dataset.get_fact('metaargfilename'))  # is None because we didn't declare metaargs or format
@@ -32,6 +33,7 @@ class OutputTests(DMTestBase):
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "")
+        self.assertEqual(dataset.branch.name, "master")
         self.assertEqual(os.path.split(dataset.get_fact('localpath'))[1], 'testfile.json')
         self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
@@ -45,6 +47,7 @@ class OutputTests(DMTestBase):
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "")
+        self.assertEqual(dataset.branch.name, "master")
         self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-20:], '/2019/11/03/testfile')
         self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNone(dataset.get_fact('metaargfilename'))
@@ -58,6 +61,7 @@ class OutputTests(DMTestBase):
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "")
+        self.assertEqual(dataset.branch.name, "master")
         self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-20:], '/2019/11/03/testfile')
         self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNone(dataset.get_fact('metaargfilename'))
@@ -71,6 +75,7 @@ class OutputTests(DMTestBase):
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "project")
+        self.assertEqual(dataset.branch.name, "master")
         self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-25:], '/2019/11/03/testfile.json')
         self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
@@ -84,6 +89,7 @@ class OutputTests(DMTestBase):
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "")
+        self.assertEqual(dataset.branch.name, "master")
         self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-25:], '/2019/11/03/testfile.json')
         self.assertEqual(dataset.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
@@ -99,6 +105,7 @@ class OutputTests(DMTestBase):
         dataset1 = datasets[0]
         self.assertEqual(dataset1.name, "testfile")
         self.assertEqual(dataset1.project, "")
+        self.assertEqual(dataset1.branch.name, "master")
         self.assertEqual(os.path.split(dataset1.get_fact('localpath'))[1], 'testfile.json')
         self.assertEqual(dataset1.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNotNone(dataset1.get_fact('metaargfilename'))
@@ -106,6 +113,7 @@ class OutputTests(DMTestBase):
         dataset2 = datasets[1]        
         self.assertEqual(dataset2.name, "testfile")
         self.assertEqual(dataset2.project, "")
+        self.assertEqual(dataset2.branch.name, "master")
         self.assertEqual(os.path.split(dataset2.get_fact('localpath'))[1], 'testfile')
         self.assertEqual(dataset2.get_fact('calling_filename'), 'outputer_tests.py')
         self.assertIsNone(dataset2.get_fact('metaargfilename'))  # is None because we didn't declare metaargs or format
