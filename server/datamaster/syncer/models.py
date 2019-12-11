@@ -3,14 +3,35 @@ from django.db import models
 from datamaster.core_models import DataMasterModelBaseMixin
 
 
+class ClientBranch(DataMasterModelBaseMixin):
+    """Record of a client-side Branch that was created within a team.
+    
+    Teams share branches, with "last wins" on most create behaviors within a branch.
+    """
+
+    created_by = models.ForeignKey("auth.User", on_delete=models.SET_NULL, blank=True, null=True)
+    team = models.ForeignKey('teams.Team', on_delete=models.CASCADE)
+    name = models.CharField(max_length=256)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['team', 'name'],
+                name='teamlevelunique'
+            )
+        ]
+
+
 class ClientDataSet(DataMasterModelBaseMixin):
     """
     Record of a file created by some local system.
+
+    We track 
     """
 
     # A single ClientDataSet entry records that a single user create a single file locally, within context of a team.
     team = models.ForeignKey('teams.Team', on_delete=models.CASCADE)
-    user = models.ForeignKey("auth.User", on_delete=models.CASCADE)
+    user = models.ForeignKey("auth.User", on_delete=models.SET_NULL, blank=True, null=True)
 
     #
     # Facts that determine a unique file
@@ -29,6 +50,9 @@ class ClientDataSet(DataMasterModelBaseMixin):
     # dataset project: simple grouping of projects. Handles nesting by "."
     project = models.CharField(max_length=1024, blank=True)
 
+    # client-side active branch, which should match a synced branch locally.
+    branch = models.ForeignKey(ClientBranch, on_delete=models.CASCADE)
+
     # local path on local machine where the file was saved
     local_path = models.CharField(max_length=2048)
 
@@ -41,7 +65,7 @@ class ClientDataSet(DataMasterModelBaseMixin):
     class Meta:
         constraints = [
             models.UniqueConstraint (
-                fields=['team', 'user', 'metaargs_guid', 'timepath', 'name', 'project'],
+                fields=['team', 'user', 'metaargs_guid', 'timepath', 'name', 'project', 'branch'],
                 name='rowlevelunique'    
             )
         ]
@@ -50,3 +74,5 @@ class ClientDataSet(DataMasterModelBaseMixin):
 class SyncedDataSet(DataMasterModelBaseMixin):
     """Record that a ClientDataSet was uploaded to a storage system."""
     pass
+
+

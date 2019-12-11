@@ -50,7 +50,7 @@ class Branch(Model):
     in a file in the context root.
     """
 
-    name = CharField(primary_key=True)
+    name = CharField(primary_key=True, max_length=256)
     syncable_state = CharField(default=BranchSyncableState.LocalOnly)
 
     class Meta:
