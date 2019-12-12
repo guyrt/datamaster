@@ -21,11 +21,13 @@ def create_stale_syncs(dataset):
             d.save()
 
 
-def sync():
+def sync(args):
     """
     Perform sync for every local, stale dataset.
     """
-    need_sync = DataSetRemoteSync.select().where(DataSetRemoteSync.sync_state==DataSetRemoteSyncStates.Stale)
+    need_sync = DataSetRemoteSync.select()
+    if not args.force_sync:
+        need_sync = need_sync.where(DataSetRemoteSync.sync_state==DataSetRemoteSyncStates.Stale)
     updates = 0
     for dataset_sync_state in need_sync:
         if not _push_dataset(dataset_sync_state.dataset):

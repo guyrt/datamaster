@@ -3,6 +3,9 @@ from django.db import models
 from datamaster.core_models import DataMasterModelBaseMixin
 
 
+default_branch_name = "master"
+
+
 class ClientBranch(DataMasterModelBaseMixin):
     """Record of a client-side Branch that was created within a team.
     

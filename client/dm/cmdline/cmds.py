@@ -22,7 +22,8 @@ _remote = _subparsers.add_parser("remote", help="Manage remote server")
 
 # Sync
 _sync = _subparsers.add_parser("sync", help="Sync to remote server")
-_sync.set_defaults(func=lambda x: sync())
+_sync.set_defaults(func=lambda x: sync(args))
+_sync.add_argument("--force", dest='force_sync', action='store_true')
 # Todo - likely want to sync to a specific remote.
 
 # List

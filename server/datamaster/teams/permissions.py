@@ -1,4 +1,5 @@
 from .models import Membership, MembershipType
+from syncer.models import ClientBranch, default_branch_name
 
 
 def grant_access(user, team, relationship_type=MembershipType.EDIT):
@@ -11,3 +12,8 @@ def grant_access(user, team, relationship_type=MembershipType.EDIT):
 
 def has_access(user, team):
     return Membership.objects.filter(user=user, team=team).exists()
+
+
+def setup_team(team):
+    """ Perform initial team setup """
+    ClientBranch.objects.get_or_create(team=team, name=default_branch_name)
