@@ -45,13 +45,22 @@ class ReadableFileName(os.PathLike):
         branch_name = self._branch.name
         if 'allpaths' in timestamp_info:
             print(timestamp_info)
-            timestamp_string = '\n'.join(['* ' + ts if ts == self._timepath else ts for ts in timestamp_info['allpaths']])
+            timestamp_string = '\n'.join(['* ' + ts if ts == self._timepath else ts for ts in timestamp_info['allpaths'] if ts])
         else:
             timestamp_string = "{cnt} total values\nMin: {min_value}\nMax: {max_value}".format(**timestamp_string)
+        
+        header = "DataSet stored at {0}".format(self._local_path)
+
+        branch_section = "Branch: {0}".format(branch_name)
+        timestamp_section = ''
+        if timestamp_string:
+            timestamp_section = "Timepaths: \n{0}".format(timestamp_string)
+        metaargs_section = ''
         if metaargs:
-            return 'Branch:{2}\nTimepaths:\n{1}\nMetaargs:\n{0}'.format(metaargs, timestamp_string, branch_name)
-        else:
-            return "Branch:{1}\nTimepaths:\n{0}".format(timestamp_string, branch_name)
+            metaargs_section = "Metaargs: \n{0}".format(metaargs)
+        
+        args = [header, ' ', branch_section, timestamp_section, metaargs_section]
+        return '\n'.join([a for a in args if a])
 
     @property
     def format(self):

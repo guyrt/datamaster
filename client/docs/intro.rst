@@ -75,7 +75,42 @@ it was created:
 
 DataMaster figures out where ``ages`` is stored and passes the correct file to python.
 
-TODO - tab complete
+**Aside: discovering your data**
+
+DM does everything it can to help you discover data sets locally.
+Tab complete works as expected.
+
+.. code-block:: python
+
+    >>> from dm import inputs
+    >>> inputs. [tab]
+    inputs.bar(      inputs.foo(      inputs.myproject inputs.withtime
+
+Docstrings work as expected:
+
+    >>> from dm import inputs
+    >>> ?inputs.myproject
+    <todo>
+    >>> ?inputs.myproject.weights
+    <todo>
+
+In addition, you can list datasets with the command line utility:
+
+.. code-block:: bash
+
+    $ dm list
+    <todo>
+
+You can call `dm list` with a dataset name to see full details:
+
+.. code-block:: bash
+
+    $ dm list example
+    <todo>
+
+
+While autocomplete works already from Jupyter, integration with VSCode and PyCharm is coming.
+
 
 **Controlling the output with additional data**
 
@@ -126,12 +161,11 @@ You can do that by augmenting the dataset:
 
 While DM still controls where the file goes, we will append ".pt".
 
-**Listing different versions**
+**Organizing your work**
+
+**Projects**
 
 
-docstring
-
-list command
 
 **Branching**
 
