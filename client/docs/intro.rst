@@ -75,42 +75,6 @@ it was created:
 
 DataMaster figures out where ``ages`` is stored and passes the correct file to python.
 
-**Aside: discovering your data**
-
-DM does everything it can to help you discover data sets locally.
-Tab complete works as expected.
-
-.. code-block:: python
-
-    >>> from dm import inputs
-    >>> inputs. [tab]
-    inputs.bar(      inputs.foo(      inputs.myproject inputs.withtime
-
-Docstrings work as expected:
-
-    >>> from dm import inputs
-    >>> ?inputs.myproject
-    <todo>
-    >>> ?inputs.myproject.weights
-    <todo>
-
-In addition, you can list datasets with the command line utility:
-
-.. code-block:: bash
-
-    $ dm list
-    <todo>
-
-You can call `dm list` with a dataset name to see full details:
-
-.. code-block:: bash
-
-    $ dm list example
-    <todo>
-
-
-While autocomplete works already from Jupyter, integration with VSCode and PyCharm is coming.
-
 
 **Controlling the output with additional data**
 
@@ -160,6 +124,67 @@ You can do that by augmenting the dataset:
     fh = open(out.model(format='pt'))
 
 While DM still controls where the file goes, we will append ".pt".
+
+**Discovering your data**
+
+DM does everything it can to help you discover data sets locally.
+Tab complete works as expected.
+
+.. code-block:: python
+
+    >>> from dm import inputs
+    >>> inputs. [tab]
+    inputs.bar(      inputs.foo(      inputs.myproject inputs.withtime
+
+Docstrings work as expected:
+
+    >>> from dm import inputs
+    >>> ?inputs.myproject
+    Type:        ReadableProject
+    String form: Project myproject
+    File:        [omitted]\datamaster\client\dm\readablefile.py
+    Docstring:
+    Datamaster Project myproject
+
+    Files:
+    outputone
+    outputtwo
+    Projects:
+    innerproject
+
+    >>> ?inputs.myproject.weights
+    In [5]: ?inputs.withtime.model
+    Signature:   inputs.myproject.model(format=None, meta=None, timepath='')
+    Type:        ReadableFileName
+    String form: Dataset myproject.model at ~\.datamaster\data\master\withtime\model\2019\11\04\model
+    File:        [omitted]\datamaster\client\dm\readablefile.py
+    Docstring:
+    DataSet stored at ~\.datamaster\data\master\withtime\model\2019\11\04\model
+
+    Branch: master
+    Timepaths:
+    2019/11/03
+    * 2019/11/04
+
+
+In addition, you can list datasets with the command line utility:
+
+.. code-block:: bash
+
+    $ dm list
+    <todo>
+
+You can call `dm list` with a dataset name to see full details:
+
+.. code-block:: bash
+
+    $ dm list example
+    <todo>
+
+
+While autocomplete works already from Jupyter, integration with VSCode and PyCharm is coming.
+
+
 
 **Organizing your work**
 

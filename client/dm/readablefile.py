@@ -7,15 +7,31 @@ class ReadableProject(object):
 
     def __init__(self, project_name):
         self._project_name = project_name
+        # store whether attributes are set as projects or files.
+        self._internal_attr = dict()
 
     def __repr__(self):
         return "Project {project}".format(project=self._project_name)
 
     def _add_project(self, readable_project):
         setattr(self, readable_project._project_name, readable_project)
+        self._internal_attr[readable_project._project_name] = 'project'
 
     def _add_file(self, readable_filename):
         setattr(self, readable_filename._name, readable_filename)
+        self._internal_attr[readable_filename._name] = 'file'
+
+    @property
+    def __doc__(self):
+        header = "Datamaster Project {0}\n\n".format(self._project_name)
+        files = '\n'.join(sorted([k for k, v in self._internal_attr.items() if v == 'file']))
+        projects = '\n'.join(sorted([k for k, v in self._internal_attr.items() if v == 'project']))
+
+        if files:
+            files = "Files:\n{0}\n\n".format(files)
+        if projects:
+            projects = "Projects:\n{0}".format(projects)
+        return "{0}{1}{2}".format(header, files, projects)
 
 
 class ReadableFileName(os.PathLike):
@@ -44,7 +60,6 @@ class ReadableFileName(os.PathLike):
         timestamp_info = get_timepaths_for_dataset(self._dataset)
         branch_name = self._branch.name
         if 'allpaths' in timestamp_info:
-            print(timestamp_info)
             timestamp_string = '\n'.join(['* ' + ts if ts == self._timepath else ts for ts in timestamp_info['allpaths'] if ts])
         else:
             timestamp_string = "{cnt} total values\nMin: {min_value}\nMax: {max_value}".format(**timestamp_string)

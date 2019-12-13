@@ -21,9 +21,3 @@ need to make a setup.py file and list our dm util
 change list util:
 - dm list should list the existing datasets and number of files.
 - dm list name should list the files in that dataset.
-
-docstring:
-only show timepaths if they exist
-same with metaargs
-show the raw file location
-add a docstring for the inputs 
