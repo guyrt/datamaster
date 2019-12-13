@@ -3,6 +3,12 @@ from django.db import models
 from datamaster.core_models import DataMasterModelBaseMixin
 
 
+class TeamManager(models.Manager):
+
+    def for_user(self, user):
+        return self.filter(membership__is_active=1, membership__user=user)
+
+
 class MembershipType(object):
 
     ADMIN = "admin"  # Full permissions, including payment and adding/deleting membership
@@ -19,6 +25,8 @@ class Team(DataMasterModelBaseMixin):
 
     team_name = models.CharField(max_length=256)
     team_slug = models.CharField(max_length=64)  # unique organization slug suitable for use in urls.
+
+    objects = TeamManager()
 
 
 class Membership(DataMasterModelBaseMixin):
