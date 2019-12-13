@@ -8,5 +8,5 @@ import atexit
 
 out = DataMasterOutput()
 
-if not os.path.exists(settings.default_fileroot):
-    os.makedirs(settings.default_fileroot)
+if not os.path.exists(settings.fileroot):
+    os.makedirs(settings.fileroot)

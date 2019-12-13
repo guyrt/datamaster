@@ -84,9 +84,9 @@ WSGI_APPLICATION = 'datamaster.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'datamastersync',
-        'USER': 'guyrt',
-        'PASSWORD': 'datamaster'
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PWD']
     }
 }
 

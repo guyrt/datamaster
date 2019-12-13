@@ -1,3 +1,4 @@
 watchdog
 gitpython
 peewee>=3.11
+yaml>=5.1.1

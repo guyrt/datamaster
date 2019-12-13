@@ -8,7 +8,9 @@ from peewee import SqliteDatabase
 from dm.models import DataSet, DataSetFact, Branch, models_list, db, bootstrap_database
 from dm.settings import default_branch
 
-dm.settings.default_fileroot = ".datamastertest/"
+
+dm.settings.fileroot = "/tmp/datamastertest/"
+dm.settings.metadata_fileroot = os.path.join(dm.settings.fileroot, '_metadata')
 
 class DMTestBase(unittest.TestCase):
     

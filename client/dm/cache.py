@@ -65,33 +65,35 @@ class DataMasterCache(object):
 
         # need to prehash the metaargs.
         metaarg_guid = DataSet.hash_metaarg(meta_args)
-        dataset, _ = DataSet.get_or_create(
-            name=name,
-            project=project,
-            metaarg_guid=metaarg_guid,
-            timepath=timepath,
-            branch=settings.active_branch,
-            defaults={'guid': uuid.uuid4()}
-        )
 
-        params_to_update = {
-            DataSetFactKeys.CallingFilename: calling_filename, 
-            DataSetFactKeys.LocalPath: path, 
-            DataSetFactKeys.State: DatasetStates.LocalDeclared,
-            DataSetFactKeys.LocalMachine: socket.getfqdn(),
-            DataSetFactKeys.LocalUsername: getpass.getuser()
-        }
-        if meta_args:
-            params_to_update[DataSetFactKeys.MetaArgFileName] = metadata_path
-        self._set_facts(dataset, params_to_update)
+        with db.atomic():
+            dataset, _ = DataSet.get_or_create(
+                name=name,
+                project=project,
+                metaarg_guid=metaarg_guid,
+                timepath=timepath,
+                branch=settings.active_branch,
+                defaults={'guid': uuid.uuid4()}
+            )
 
-        if meta_args:
-            dataset.update_metaargs(meta_args)
+            params_to_update = {
+                DataSetFactKeys.CallingFilename: calling_filename, 
+                DataSetFactKeys.LocalPath: path, 
+                DataSetFactKeys.State: DatasetStates.LocalDeclared,
+                DataSetFactKeys.LocalMachine: socket.getfqdn(),
+                DataSetFactKeys.LocalUsername: getpass.getuser()
+            }
+            if meta_args:
+                params_to_update[DataSetFactKeys.MetaArgFileName] = metadata_path
+            self._set_facts(dataset, params_to_update)
 
-        dataset.last_modified_time = datetime.datetime.now()
-        dataset.save()
+            if meta_args:
+                dataset.update_metaargs(meta_args)
 
-        create_stale_syncs(dataset)
+            dataset.last_modified_time = datetime.datetime.now()
+            dataset.save()
+
+            create_stale_syncs(dataset)
 
         return dataset  # Todo verify this thing has the facts set up.
 
@@ -146,8 +148,8 @@ def get_timepaths_for_dataset(dataset, limit=10):
 
 
 # runs on startup
-file_exists = os.path.exists(settings.local_datafile)
-db.initialize(SqliteDatabase(settings.local_datafile))
+file_exists = os.path.exists(settings.local_database)
+db.initialize(SqliteDatabase(settings.local_database))
 
 if not file_exists:
     bootstrap_database(db)

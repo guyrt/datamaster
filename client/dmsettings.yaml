@@ -1,0 +1,8 @@
+fileroot: "C:/Users/riguy/.datamaster/data/"
+metadata_fileroot: "C:/Users/riguy/.datamaster/data/_metadata"
+local_database: 'C:/users/riguy/.datamaster/dbmaster.db'
+
+remote_server: "http://127.0.0.1:8000/gettoken/"
+remote_server_sync_post: "http://127.0.0.1:8000/clientdataset/"
+
+active_branch: 'master'
