@@ -14,12 +14,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework_nested import routers
+
+from syncer.views import ClientDataSetViewSet
+from teams.views import TeamViewSet
+
+router = routers.SimpleRouter()
+router.register(r'', TeamViewSet, basename='team')
+
+client_dataset_router = routers.NestedSimpleRouter(router, r'', lookup='team')
+client_dataset_router.register(r'clientdataset', ClientDataSetViewSet, basename='clientdataset')
 
 urlpatterns = [
-    path('', include('syncer.urls')),
+    re_path(r'^', include(router.urls)),
+    re_path(r'^', include(client_dataset_router.urls)),
     path('', include('teams.urls')),
     path('gettoken/', obtain_auth_token),  # provides a URL to get a token given username/password.
 ]

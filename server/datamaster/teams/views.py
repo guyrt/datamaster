@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
 from rest_framework.exceptions import NotFound
 from django.contrib.auth.models import User
 
@@ -9,9 +9,11 @@ from teams.permissions import grant_access
 from teams.serializers import TeamSerializer, MembershipSerializer, UserSerializer
 
 
-class TeamList(generics.ListCreateAPIView):
-    
+class TeamViewSet(viewsets.ModelViewSet):
+
     serializer_class = TeamSerializer
+    lookup_field = 'slug'
+    lookup_value_regex = '[\w_-]+'
 
     def get_queryset(self):
         return Team.objects.filter(is_active=True).filter(membership__user=self.request.user)
@@ -47,11 +49,6 @@ class UserInTeamList(generics.ListCreateAPIView):
         except Team.DoesNotExist:
             raise NotFound()
         return User.objects.filter(is_active=True).filter(membership__is_active=1, membership__team=team)
-
-
-class TeamDetails(generics.RetrieveUpdateAPIView, DeactivateModelMixin):
-    queryset = Team.objects.filter(is_active=True)
-    serializer_class = TeamSerializer
 
 
 class MembershipDetails(generics.RetrieveUpdateAPIView, DeactivateModelMixin):

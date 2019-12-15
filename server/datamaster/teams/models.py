@@ -24,7 +24,7 @@ class Team(DataMasterModelBaseMixin):
     """ Tracks a team, which is the main organizational unit in DataMaster """
 
     team_name = models.CharField(max_length=256)
-    team_slug = models.CharField(max_length=64)  # unique organization slug suitable for use in urls.
+    team_slug = models.SlugField(max_length=64)  # unique organization slug suitable for use in urls.
 
     objects = TeamManager()
 

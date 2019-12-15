@@ -21,7 +21,7 @@ class ClientBranchInDataSetField(serializers.RelatedField):
         return value.name
 
     def get_object(self, view_name, view_args, view_kwargs):
-        import pdb; pdb.set_trace()
+        # TODO - fix
         lookup_kwargs = {
            'organization__slug': view_kwargs['organization_slug'],
            'pk': view_kwargs['customer_pk']
