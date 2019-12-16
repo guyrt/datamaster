@@ -24,6 +24,11 @@ class ClientBranch(DataMasterModelBaseMixin):
             )
         ]
 
+    def deactivate(self):
+        self.is_active = False
+        self.clientdataset_set.update(is_active=False)
+        self.save()
+
 
 class ClientDataSet(DataMasterModelBaseMixin):
     """
