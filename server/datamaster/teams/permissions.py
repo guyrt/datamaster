@@ -16,4 +16,5 @@ def has_access(user, team):
 
 def setup_team(team):
     """ Perform initial team setup """
-    ClientBranch.objects.get_or_create(team=team, name=default_branch_name)
+    b, _ = ClientBranch.objects.get_or_create(team=team, name=default_branch_name)
+    return b
