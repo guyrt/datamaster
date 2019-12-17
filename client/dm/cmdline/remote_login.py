@@ -9,7 +9,8 @@ def login(args):
     username, password = args.username, args.password
     if not args.password:
         password = getpass("Enter password: ")
-    url = settings.retrieve_remote()['remote_authentication_url']
+    current_remote = settings.retrieve_remote()
+    url = current_remote['location'] + current_remote['urls']['remote_authentication']
 
     try:
         results = requests.post(url, data={'username': username, 'password': password})
@@ -19,8 +20,9 @@ def login(args):
         return
     
     if results.status_code == 200:
-        # TODO - get urls and get the possible teams.
-        settings.save_token(username, results.json()['token'], {})
+        token = results.json()['token']
+        user_details = get_user_details(current_remote, username, token)
+        settings.save_token(username, token, user_details['membership_set'])
         print("success")
     elif results.status_code == 404:
         # TODO: log this!
@@ -34,5 +36,13 @@ def login(args):
         print("Unknown error.")
 
 
-def get_user_details(username):
-    
+def get_user_details(current_remote, username, token):
+    """Retrieve details about user team memberships"""
+    headers = {'Authorization': 'Token {0}'.format(token)}
+    url = current_remote['location'] + current_remote['urls']['remote_user_details'].replace('[UserSlug]', username)
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+
+    # TODO: log this
+    raise ValueError("Error retrieving user details with new credentials")

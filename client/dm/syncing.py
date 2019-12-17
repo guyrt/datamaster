@@ -45,10 +45,14 @@ def _push_dataset(dataset):
     serialized_dataset['team'] = settings.active_remote_team
     serialized_dataset['user'] = settings.active_remote_user
 
-    headers = {'Authorization': 'Token {0}'.format(settings.retrieve_token())}
+    remote_obj = settings.retrieve_remote()
+    headers = {'Authorization': 'Token {0}'.format(remote_obj['token'])}
+    team = remote_obj['teams'][settings.active_remote_team]
+    url = remote_obj['location'] + team['urls']['dataset_sync']
     
-    response = requests.post(settings.remote_server_sync_post, data=serialized_dataset, headers=headers)
+    response = requests.post(url, data=serialized_dataset, headers=headers)
     if response.status_code < 200 or response.status_code >= 300:
         print(response.content)
         return False
+
     return True

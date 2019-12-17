@@ -62,3 +62,4 @@ class UserDetails(generics.RetrieveUpdateAPIView, DeactivateModelMixin):
         permissions.AllowAny # Or anon users can't register
     ]
     serializer_class = UserSerializer
+    lookup_field = 'username'
