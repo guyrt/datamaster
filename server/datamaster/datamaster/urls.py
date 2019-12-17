@@ -29,8 +29,8 @@ client_dataset_router = routers.NestedSimpleRouter(router, r'', lookup='team')
 client_dataset_router.register(r'clientdataset', ClientDataSetViewSet, basename='clientdataset')
 
 urlpatterns = [
-    re_path(r'^', include(router.urls)),
-    re_path(r'^', include(client_dataset_router.urls)),
     path('', include('teams.urls')),
     path('gettoken/', obtain_auth_token),  # provides a URL to get a token given username/password.
+    re_path(r'^', include(router.urls)),
+    re_path(r'^', include(client_dataset_router.urls)),
 ]

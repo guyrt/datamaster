@@ -3,26 +3,13 @@ import requests
 
 from ..settings import settings
 
-def get_server():
-    # todo load from settings
-    return settings.remote_server
-
-
-def save_token(token_value):
-    f = open(settings.local_credentials_file, 'w')
-    f.write(token_value)
-    f.close()
-
-def retrieve_token():
-    f = open(settings.local_credentials_file, 'r')
-    return f.read()
 
 def login(args):
     """Perform remote login based on user input args"""
     username, password = args.username, args.password
     if not args.password:
         password = getpass("Enter password: ")
-    url = get_server()
+    url = settings.retrieve_remote()['remote_authentication_url']
 
     try:
         results = requests.post(url, data={'username': username, 'password': password})
@@ -32,7 +19,8 @@ def login(args):
         return
     
     if results.status_code == 200:
-        save_token(results.json()['token'])
+        # TODO - get urls and get the possible teams.
+        settings.save_token(username, results.json()['token'], {})
         print("success")
     elif results.status_code == 404:
         # TODO: log this!
@@ -44,3 +32,7 @@ def login(args):
     else:
         # TODO: log this!
         print("Unknown error.")
+
+
+def get_user_details(username):
+    

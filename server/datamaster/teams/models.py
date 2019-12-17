@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 from datamaster.core_models import DataMasterModelBaseMixin
 
@@ -37,3 +38,8 @@ class Membership(DataMasterModelBaseMixin):
 
     relationship_type = models.CharField(max_length=64, choices=MembershipType.CHOICES, default=MembershipType.EDIT)
     
+
+def get_urls_for_team(team):
+    return {
+        'dataset_sync': reverse('clientdataset-list', args=(team.team_slug, ))
+    }

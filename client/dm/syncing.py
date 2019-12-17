@@ -3,7 +3,6 @@ import requests
 from .models import DataSetRemoteSync, DataSetRemoteSyncStates
 from .serializers import DataSetSerializer
 from .settings import settings
-from .cmdline.remote_login import retrieve_token
 
 # This is the only remote we support right now. In future, consider storing more than one.
 remotes = ['main']  
@@ -43,10 +42,10 @@ def _push_dataset(dataset):
     """ Serialize a DataSet and push to server """
     serialized_dataset = DataSetSerializer().to_json_serializable(dataset)
 
-    serialized_dataset['team'] = 'datamastertest'
-    serialized_dataset['user'] = 'guyrt'
+    serialized_dataset['team'] = settings.active_remote_team
+    serialized_dataset['user'] = settings.active_remote_user
 
-    headers = {'Authorization': 'Token {0}'.format(retrieve_token())}
+    headers = {'Authorization': 'Token {0}'.format(settings.retrieve_token())}
     
     response = requests.post(settings.remote_server_sync_post, data=serialized_dataset, headers=headers)
     if response.status_code < 200 or response.status_code >= 300:

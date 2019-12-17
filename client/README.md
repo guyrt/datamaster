@@ -22,17 +22,9 @@ change list util:
 - dm list should list the existing datasets and number of files.
 - dm list name should list the files/projects in that dataset. have a recursive command
 
-
-On a write, delete any facts about the dataset that are no longer up to date.
-
-
-
 carl - writes a lot of code
 jordan! - would be honest
 niki - challenge to explain but very critical
+kenya
 
 get danielle to schedule with keith and the other woman.
-
-fix to viewset for team
-
-test create
