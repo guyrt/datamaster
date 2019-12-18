@@ -56,10 +56,16 @@ class MembershipDetails(generics.RetrieveUpdateAPIView, DeactivateModelMixin):
     serializer_class = MembershipSerializer
 
 
+class UserMatchesRequestPermission(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj
+
+
 class UserDetails(generics.RetrieveUpdateAPIView, DeactivateModelMixin):
     queryset = User.objects.filter(is_active=True)
     permission_classes = [
-        permissions.AllowAny # Or anon users can't register
+        UserMatchesRequestPermission
     ]
     serializer_class = UserSerializer
     lookup_field = 'username'
