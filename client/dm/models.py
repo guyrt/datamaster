@@ -35,6 +35,7 @@ class DataSetFactKeys(object):
     LocalMachine = 'localmachine'
     LocalUsername = 'localusername'
     MetaArgFileName = 'metaargfilename'
+    PreviousFileReads = 'previousfilereads'
 
 
 class BranchSyncableState(object):

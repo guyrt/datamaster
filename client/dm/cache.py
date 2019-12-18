@@ -59,7 +59,7 @@ class DataMasterCache(object):
         except DoesNotExist:
             return None
 
-    def get_or_create_dataset(self, name, path, metadata_path, project, calling_filename, timepath, file_extension, meta_args=None):
+    def get_or_create_dataset(self, name, path, metadata_path, project, calling_filename, timepath, file_extension, meta_args, previousfilereads):
         timepath = timepath or ''  # convert null to string empty.
         meta_args = self._combine_args(meta_args, file_extension)
 
@@ -83,9 +83,18 @@ class DataMasterCache(object):
                 DataSetFactKeys.LocalMachine: socket.getfqdn(),
                 DataSetFactKeys.LocalUsername: getpass.getuser()
             }
+            params_to_purge = []
+
             if meta_args:
                 params_to_update[DataSetFactKeys.MetaArgFileName] = metadata_path
-            self._set_facts(dataset, params_to_update)
+            else:
+                params_to_purge.append(DataSetFactKeys.MetaArgFileName)
+            if previousfilereads:
+                params_to_update[DataSetFactKeys.PreviousFileReads] = _serialize_filereads(previousfilereads)
+            else:
+                params_to_purge.append(DataSetFactKeys.PreviousFileReads)
+
+            self._set_facts(dataset, params_to_update, params_to_purge)
 
             if meta_args:
                 dataset.update_metaargs(meta_args)
@@ -126,12 +135,15 @@ class DataMasterCache(object):
         dataset = dsf.dataset
         self._set_facts(dataset, facts)
 
-    def _set_facts(self, dataset, facts):
+    def _set_facts(self, dataset, facts, params_to_purge=None):
         for k, v in facts.items():
             ds, created = DataSetFact.get_or_create(dataset=dataset, key=k, defaults={'value': v})
             if not created:
                 ds.value = v
                 ds.save()
+        # TODO
+        # if params_to_purge:
+        #    DataSetFact.delete().where(DataSetFact.dataset==dataset, DataSetFact.key in params_to_purge).execute()
 
 
 def get_timepaths_for_dataset(dataset, limit=10):
@@ -145,6 +157,10 @@ def get_timepaths_for_dataset(dataset, limit=10):
     else:
         min_value, max_value = timepaths.select(fn.Min(DataSet.timepath), fn.Max(DataSet.timepath)).scalar(as_tuple=True)
         return {'cnt': total_records, 'min_value': min_value, 'max_value': max_value}
+
+
+def _serialize_filereads(datasets):
+    return ';'.join(d.guid for d in datasets)
 
 
 # runs on startup

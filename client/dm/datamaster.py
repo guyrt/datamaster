@@ -3,6 +3,7 @@ import inspect
 import os
 
 from .cache import cache
+from .events import global_event_handler
 from .filetools import make_folder
 from .models import DatasetStates, DataSet
 from .settings import settings
@@ -84,7 +85,8 @@ class WriteableFileName(os.PathLike):
             self._calling_filename,
             self._timepath,
             self._filesuffix,
-            self._metaargs
+            self._metaargs,
+            global_event_handler.get_fileread()
         )
         cache.set_as_default(dataset)
         inputs._reset()
@@ -95,9 +97,6 @@ class DataMasterOutput(object):
     """
     Provide paths for writing data.
     """
-
-    def __init__(self):
-        super(DataMasterOutput, self).__init__()
 
     def __getattribute__(self, name):
         if name.startswith("_"):

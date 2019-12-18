@@ -46,6 +46,8 @@ class ClientDataSetSerializer(serializers.ModelSerializer):
 
     branch = ClientBranchInDataSetField()
 
+    local_machine_guid = serializers.CharField()
+
     def validate(self, data):
         if not has_access(data['user'], data['team']):
             raise serializers.ValidationError("Invalid team for user.")
@@ -77,7 +79,8 @@ class ClientDataSetSerializer(serializers.ModelSerializer):
             defaults={
                 'local_machine_name': validated_data['local_machine_name'],
                 'local_path': validated_data['local_path'],
-                'local_machine_time': validated_data['local_machine_time']
+                'local_machine_time': validated_data['local_machine_time'],
+                'local_machine_guid': validated_data['local_machine_guid']
             })
 
         if created:
@@ -89,4 +92,4 @@ class ClientDataSetSerializer(serializers.ModelSerializer):
         model = ClientDataSet
         fields = ['team', 'user', 'metaargs_guid', 'timepath', 'name',
         'project', 'local_path', 'local_machine_name', 'local_machine_time',
-        'branch']
+        'branch', 'local_machine_guid']

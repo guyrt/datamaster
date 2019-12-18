@@ -70,11 +70,18 @@ class ClientDataSet(DataMasterModelBaseMixin):
     # time that object was created on local machine
     local_machine_time = models.DateTimeField()
 
+    # guid from originator of a dataset
+    local_machine_guid = models.CharField(max_length=36)
+
     class Meta:
         constraints = [
             models.UniqueConstraint (
                 fields=['team', 'user', 'metaargs_guid', 'timepath', 'name', 'project', 'branch'],
                 name='rowlevelunique'    
+            ),
+            models.UniqueConstraint(
+                fields=['local_machine_guid'],
+                name='localmachienguidunique'
             )
         ]
 

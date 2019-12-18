@@ -1,6 +1,7 @@
 import os
 from .cache import cache, get_timepaths_for_dataset
 from .models import DatasetStates, DataSet, ModelConstants
+from .events import global_event_handler
 
 
 class ReadableProject(object):
@@ -99,7 +100,8 @@ class ReadableFileName(os.PathLike):
 
     def __fspath__(self):
         # eventually this will need to ensure the file is local.
-        return self._local_path # todo just look it up.
+        global_event_handler.fire_fileread(self._dataset)
+        return self._local_path
 
 
 class DataMasterInput(object):
