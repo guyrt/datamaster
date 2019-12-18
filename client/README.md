@@ -45,3 +45,7 @@ what do we do with pyspark?
 handle that red line in vscode
 
 how important is it that we have this python easy demo?
+
+log to server:
+creating file
+relationships
