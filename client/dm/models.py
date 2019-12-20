@@ -30,12 +30,21 @@ class DataSetFactKeys(object):
     """
 
     CallingFilename = 'calling_filename'
+    CallingFilenameContentHash = 'calling_filename_content_hash'
+    CodeCopyFilename = 'code_copy_filename'
     LocalPath = 'localpath'
     State = 'state'
     LocalMachine = 'localmachine'
     LocalUsername = 'localusername'
     MetaArgFileName = 'metaargfilename'
     PreviousFileReads = 'previousfilereads'
+
+    # Git facts
+    GitRoot = 'git_root'
+    GitActiveBranch = 'git_active_branch'
+    GitCommitHexSha = 'git_commit_hexsha'
+    GitCommitAuthor = 'git_commit_author'
+    GitCommitAuthoredDatetime = 'git_commit_authored_datetime'
 
 
 class BranchSyncableState(object):

@@ -2,6 +2,7 @@ import os
 import shutil
 from ..cache import cache
 from ..datamaster import WriteableFileName
+from ..settings import settings
 
 def track_existing_path(args):
     filename = args.file
@@ -13,7 +14,7 @@ def track_existing_path(args):
     if not os.path.exists(filename):
         raise ValueError("Path {0} does not exist".format(filename))
 
-    w = WriteableFileName(fname_parts, "cmdline")
+    w = WriteableFileName(fname_parts, settings.cmdline_filename)
 
     if args.keepext:
         _, ext = os.path.splitext(filename)

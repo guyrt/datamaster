@@ -1,10 +1,9 @@
-import git
 import inspect
 import os
 
 from .cache import cache
 from .events import global_event_handler
-from .filetools import make_folder
+from .filetools import make_folder, make_paths, get_clean_filename
 from .models import DatasetStates, DataSet
 from .settings import settings
 from .readablefile import inputs
@@ -56,20 +55,9 @@ class WriteableFileName(os.PathLike):
 
     def _get_path(self):
         datasetname = self._name[-1]
-        file_name_parts = datasetname
-
-        if self._timepath:
-            filename = os.path.join(file_name_parts, self._timepath, datasetname)
-        else:
-            filename = file_name_parts
-        if self._filesuffix:
-            filename += "." + self._filesuffix
-
         project = '.'.join(self._name[:-1])
-        full_path = os.path.join(settings.fileroot, settings.active_branch, os.path.join(project), DataSet.hash_metaarg(self._metaargs), filename)
-        metadata_path = os.path.join(settings.metadata_fileroot, settings.active_branch, os.path.join(project), DataSet.hash_metaarg(self._metaargs), filename)
-        full_path = os.path.normpath(full_path)
-        metadata_path = os.path.normpath(metadata_path)
+        hashed_metaargs = DataSet.hash_metaarg(self._metaargs)
+        full_path, metadata_path, _ = make_paths(datasetname, project, self._timepath, self._filesuffix, hashed_metaargs)
         return full_path, metadata_path, datasetname, project
 
     def __fspath__(self):
@@ -102,21 +90,6 @@ class DataMasterOutput(object):
         if name.startswith("_"):
             return super(DataMasterOutput, self).__getattribute__(name)
         iframe = inspect.currentframe().f_back
-        calling_filename = _get_clean_filename(iframe)
+        calling_filename = get_clean_filename(iframe)
         return WriteableFileName(name, calling_filename)
 
-
-def _get_clean_filename(iframe):
-    rawpath = iframe.f_code.co_filename
-    full_path = os.path.abspath(rawpath)
-    try:
-        git_repo = git.Repo(full_path, search_parent_directories=True)
-    except git.NoSuchPathError:
-        return full_path
-    git_root = git_repo.git.rev_parse("--show-toplevel")
-    if git_root:
-        git_root_path = len(str(git_root)) + 1
-        final_path = full_path[git_root_path:]
-    else:
-        final_path = full_path
-    return os.path.basename(final_path)

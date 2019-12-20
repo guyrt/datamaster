@@ -12,6 +12,7 @@ from dm.settings import default_branch
 
 dm.settings.fileroot = "/tmp/datamastertest/"
 dm.settings.metadata_fileroot = os.path.join(dm.settings.fileroot, '_metadata')
+dm.settings.codecopy_fileroot = os.path.join(dm.settings.fileroot, '_codecopy')
 
 class DMTestBase(unittest.TestCase):
     

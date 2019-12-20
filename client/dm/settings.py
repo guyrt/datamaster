@@ -95,6 +95,7 @@ class _Settings(object):
 
     fileroot = os.path.join(user_path, 'data')
     metadata_fileroot =  os.path.join(fileroot, '_metadata')
+    codecopy_fileroot =  os.path.join(fileroot, '_codecopy')
 
     local_database = os.path.join(user_path, 'dbmaster.db')
 
@@ -106,6 +107,11 @@ class _Settings(object):
     active_remote_team = 'datamastertest'
     active_branch = default_branch
     active_remote_user = 'guyrt'
+
+    # rarely updated by users
+
+    # Used by the track cmd line option as the creating filename.
+    cmdline_filename = "[cmdline]"
 
     def save(self):
         """ Save from location that was used to load settings """

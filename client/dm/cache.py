@@ -1,3 +1,4 @@
+import hashlib
 import os
 import sqlite3
 import uuid
@@ -6,6 +7,7 @@ import socket
 import getpass
 from peewee import DoesNotExist, fn, SqliteDatabase
 
+from .filetools import make_paths, copy_file, get_gitroot
 from .models import (
     Branch,
     DataSet,
@@ -105,6 +107,11 @@ class DataMasterCache(object):
 
         create_stale_syncs(dataset)
 
+        if calling_filename:
+            _, _, codecopy_filename = make_paths(dataset.name, dataset.project, timepath, file_extension, metaarg_guid)
+            self._cache_creating_file(dataset, calling_filename, codecopy_filename)
+            self._cache_git_info(dataset, calling_filename)
+
         return dataset  # Todo verify this thing has the facts set up.
 
     def _combine_args(self, meta_args, file_extension):
@@ -145,6 +152,51 @@ class DataMasterCache(object):
         if params_to_purge:
             DataSetFact.delete().where(DataSetFact.dataset==dataset, DataSetFact.key.in_(params_to_purge)).execute()
 
+    def _cache_creating_file(self, dataset, creating_filename, codecopy_filename):
+        """Get a copy of the creating filename and store it as a DataSetFact"""
+        if not creating_filename or creating_filename == settings.cmdline_filename:
+            # remove the keys this function sets.
+            self._set_facts(dataset, {}, [DataSetFactKeys.CodeCopyFilename, DataSetFactKeys.CallingFilenameContentHash])
+            return
+
+        creating_filename = os.path.abspath(creating_filename)
+        copy_file(creating_filename, codecopy_filename)
+
+        hasher = hashlib.md5()
+        with open(codecopy_filename, 'rb') as afile:
+            buf = afile.read()
+            hasher.update(buf)
+        file_hash = hasher.hexdigest()
+        new_kwargs = {
+            DataSetFactKeys.CodeCopyFilename: codecopy_filename,
+            DataSetFactKeys.CallingFilenameContentHash: file_hash
+        }
+        self._set_facts(dataset, new_kwargs)
+
+    def _cache_git_info(self, dataset, creating_filename):
+        """ Get information about git root, git commit/branch, and git diff. Set as facts """
+        if not creating_filename or creating_filename == settings.cmdline_filename:
+            # remove teh keys this function sets.
+            keys_to_remove = [
+                DataSetFactKeys.GitRoot,
+                DataSetFactKeys.GitActiveBranch,
+                DataSetFactKeys.GitCommitHexSha,
+                DataSetFactKeys.GitCommitAuthor,
+                DataSetFactKeys.GitCommitAuthoredDatetime
+            ]
+            self._set_facts(dataset, {}, keys_to_remove)
+            return
+
+        git_info = get_gitroot(creating_filename)
+        new_kwargs = {
+            DataSetFactKeys.GitRoot: git_info['git_root'],
+            DataSetFactKeys.GitActiveBranch: git_info['active_branch'],
+            DataSetFactKeys.GitCommitHexSha: git_info['commit_hexsha'],
+            DataSetFactKeys.GitCommitAuthor: git_info['commit_author'],
+            DataSetFactKeys.GitCommitAuthoredDatetime: git_info['commit_authored_datetime']
+        }
+        self._set_facts(dataset, new_kwargs)
+        
 
 def get_timepaths_for_dataset(dataset, limit=10):
     '''Identify all time paths in a dataset. Returns all of them if there are 10 or less. Returns min/max/count if more than 10.'''
@@ -161,6 +213,7 @@ def get_timepaths_for_dataset(dataset, limit=10):
 
 def _serialize_filereads(datasets):
     return ';'.join(d.guid for d in datasets)
+
 
 
 # runs on startup
