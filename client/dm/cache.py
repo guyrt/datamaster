@@ -89,20 +89,21 @@ class DataMasterCache(object):
                 params_to_update[DataSetFactKeys.MetaArgFileName] = metadata_path
             else:
                 params_to_purge.append(DataSetFactKeys.MetaArgFileName)
+
             if previousfilereads:
                 params_to_update[DataSetFactKeys.PreviousFileReads] = _serialize_filereads(previousfilereads)
             else:
                 params_to_purge.append(DataSetFactKeys.PreviousFileReads)
-
+            
             self._set_facts(dataset, params_to_update, params_to_purge)
-
-            if meta_args:
-                dataset.update_metaargs(meta_args)
 
             dataset.last_modified_time = datetime.datetime.now()
             dataset.save()
 
-            create_stale_syncs(dataset)
+        if meta_args:
+            dataset.update_metaargs(meta_args, metadata_path)
+
+        create_stale_syncs(dataset)
 
         return dataset  # Todo verify this thing has the facts set up.
 
@@ -141,9 +142,8 @@ class DataMasterCache(object):
             if not created:
                 ds.value = v
                 ds.save()
-        # TODO
-        # if params_to_purge:
-        #    DataSetFact.delete().where(DataSetFact.dataset==dataset, DataSetFact.key in params_to_purge).execute()
+        if params_to_purge:
+            DataSetFact.delete().where(DataSetFact.dataset==dataset, DataSetFact.key.in_(params_to_purge)).execute()
 
 
 def get_timepaths_for_dataset(dataset, limit=10):

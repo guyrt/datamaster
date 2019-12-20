@@ -11,7 +11,7 @@ from .readablefile import inputs
 
 
 class WriteableFileName(os.PathLike):
-    """todo: class docstring"""
+    """Main entry point to get a writeable file."""
 
     def __init__(self, name, calling_filename):
         self._filesuffix = None

@@ -42,10 +42,4 @@ what do we do with pyspark?
 
 *** - maybe we should keep a "filesystemtype" stamp that tracks differently? ***
 
-handle that red line in vscode
-
 how important is it that we have this python easy demo?
-
-log to server:
-creating file
-relationships

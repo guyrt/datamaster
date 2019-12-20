@@ -98,9 +98,11 @@ class DataSet(Model):
     def metaargs(self):
         return self._metaargs
 
-    def update_metaargs(self, metaargs):
+    def update_metaargs(self, metaargs, metadata_path=None):
         self._metaargs.update(metaargs)
         self.metaarg_guid = self.hash_metaarg(self._metaargs)
+        if metadata_path:
+            _dump_metaargs(self, metadata_path)
 
     def save(self, *args, **kwargs):
         """ Save then dump metaargs nearby. """
@@ -197,11 +199,12 @@ class DataSetRemoteSync(Model):
 models_list = (DataSet, DataSetFact, DataSetRemoteSync, Branch)
 
 
-def _dump_metaargs(dataset):
+def _dump_metaargs(dataset, dump_filename=None):
     if not dataset.metaargs:
         return
     metaargs_str = json.dumps(dataset.metaargs)
-    dump_filename = dataset.get_metadata_filename()
+    if not dump_filename:
+        dump_filename = dataset.get_metadata_filename()
     make_folder(dump_filename)
     f = open(dump_filename, 'w')
     f.write(metaargs_str)

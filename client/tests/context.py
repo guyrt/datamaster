@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -22,6 +23,7 @@ class DMTestBase(unittest.TestCase):
         for model in models_list:
             model.delete().execute()
         Branch.create(name=default_branch)
+        shutil.rmtree(dm.settings.fileroot, onerror=lambda function, path, excinfo: print("Failed to delete {0}".format(path)))
 
 
 db.initialize(SqliteDatabase(":memory:"))
