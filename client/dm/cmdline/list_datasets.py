@@ -30,7 +30,7 @@ def _datasets_to_string(dataset_grouping):
 
 def _single_dataset_to_string(dataset):
     s = "* " if dataset.is_default else "  "
-    s += dataset.get_local_filename()
+    s += str(dataset.get_local_filename())
     return s
 
 
