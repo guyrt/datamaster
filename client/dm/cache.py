@@ -185,9 +185,12 @@ class DataMasterCache(object):
                 DataSetFactKeys.GitCommitAuthoredDatetime
             ]
             self._set_facts(dataset, {}, keys_to_remove)
-            return
+            return 
 
         git_info = get_gitroot(creating_filename)
+        if not git_info:
+            return
+
         new_kwargs = {
             DataSetFactKeys.GitRoot: git_info['git_root'],
             DataSetFactKeys.GitActiveBranch: git_info['active_branch'],

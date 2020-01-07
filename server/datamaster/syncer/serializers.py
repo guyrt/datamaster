@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from syncer.models import ClientDataSet, ClientBranch
+from rest_framework.utils import model_meta
+from syncer.models import ClientDataSet, ClientBranch, ClientDataSetFact
 from teams.models import Team, Membership
 from teams.permissions import has_access
 
@@ -32,6 +33,13 @@ class ClientBranchInDataSetField(serializers.RelatedField):
         return data
 
 
+class ClientDataSetFactSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ClientDataSetFact
+        fields = ['key', 'value']
+
+
 class ClientDataSetSerializer(serializers.ModelSerializer):
 
     team = serializers.SlugRelatedField(
@@ -48,10 +56,12 @@ class ClientDataSetSerializer(serializers.ModelSerializer):
 
     local_machine_guid = serializers.CharField()
 
+    facts = ClientDataSetFactSerializer(many=True)
+
     def validate(self, data):
         if not has_access(data['user'], data['team']):
             raise serializers.ValidationError("Invalid team for user.")
-        
+
         branch_name = data['branch']
         branch, created = ClientBranch.objects.get_or_create(
             team=data['team'], 
@@ -67,6 +77,46 @@ class ClientDataSetSerializer(serializers.ModelSerializer):
 
         return data
 
+    def update(self, instance, validated_data):
+        """ Custom updater required to handle the 'facts' field.
+        """
+        # Update base
+        info = model_meta.get_field_info(instance)
+
+        # Simply set each attribute on the instance, and then save it.
+        # Note that unlike `.create()` we don't need to treat many-to-many
+        # relationships as being a special case. During updates we already
+        # have an instance pk for the relationships to be associated with.
+        m2m_fields = []
+        for attr, value in validated_data.items():
+            if attr == 'facts':
+                # Ignore facts, which are handled later.
+                pass
+            elif attr in info.relations and info.relations[attr].to_many:
+                m2m_fields.append((attr, value))
+            else:
+                setattr(instance, attr, value)
+
+        instance.save()
+
+        # Note that many-to-many fields are set after updating instance.
+        # Setting m2m fields triggers signals which could potentially change
+        # updated instance and we do not want it to collide with .update()
+        for attr, value in m2m_fields:
+            field = getattr(instance, attr)
+            field.set(value)
+        
+        # Set facts for the ClientDataSet. Anything not contained on the instance gets set to deactivated.
+        ClientDataSetFact.objects.filter(clientdataset=instance).update(is_active=False)
+        for fact in validated_data['facts']:
+            k = fact['key']
+            v = fact['value']
+            fact, created = ClientDataSetFact.objects.get_or_create(key=k, value=v, clientdataset=instance)
+            if not created and not fact.is_active:
+                fact.is_active = True
+                fact.save()
+        return instance
+
     def create(self, validated_data):
         m, created = ClientDataSet.objects.get_or_create(
             team=validated_data['team'],
@@ -77,9 +127,6 @@ class ClientDataSetSerializer(serializers.ModelSerializer):
             project=validated_data['project'],
             branch=validated_data['branch'],
             defaults={
-                'local_machine_name': validated_data['local_machine_name'],
-                'local_path': validated_data['local_path'],
-                'local_machine_time': validated_data['local_machine_time'],
                 'local_machine_guid': validated_data['local_machine_guid']
             })
 
@@ -91,5 +138,4 @@ class ClientDataSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientDataSet
         fields = ['team', 'user', 'metaargs_guid', 'timepath', 'name',
-        'project', 'local_path', 'local_machine_name', 'local_machine_time',
-        'branch', 'local_machine_guid']
+        'project', 'branch', 'local_machine_guid', 'facts']    

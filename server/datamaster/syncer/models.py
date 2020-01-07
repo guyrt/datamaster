@@ -33,8 +33,6 @@ class ClientBranch(DataMasterModelBaseMixin):
 class ClientDataSet(DataMasterModelBaseMixin):
     """
     Record of a file created by some local system.
-
-    We track 
     """
 
     # A single ClientDataSet entry records that a single user create a single file locally, within context of a team.
@@ -61,15 +59,6 @@ class ClientDataSet(DataMasterModelBaseMixin):
     # client-side active branch, which should match a synced branch locally.
     branch = models.ForeignKey(ClientBranch, on_delete=models.CASCADE)
 
-    # local path on local machine where the file was saved
-    local_path = models.CharField(max_length=2048)
-
-    # store the fully qualified name of the machine that created the file.
-    local_machine_name = models.CharField(max_length=1024)
-
-    # time that object was created on local machine
-    local_machine_time = models.DateTimeField()
-
     # guid from originator of a dataset
     local_machine_guid = models.CharField(max_length=36)
 
@@ -82,6 +71,22 @@ class ClientDataSet(DataMasterModelBaseMixin):
             models.UniqueConstraint(
                 fields=['local_machine_guid'],
                 name='localmachienguidunique'
+            )
+        ]
+
+
+class ClientDataSetFact(DataMasterModelBaseMixin):
+    clientdataset = models.ForeignKey(ClientDataSet, related_name='facts', on_delete=models.CASCADE)
+
+    key = models.CharField(max_length=256)
+
+    value = models.TextField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['clientdataset', 'key'],
+                name='ClientDataSetKey'
             )
         ]
 

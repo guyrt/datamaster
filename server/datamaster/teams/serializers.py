@@ -22,8 +22,6 @@ class TeamWithUrlSerializer(serializers.ModelSerializer):
         fields = ['team_name', 'team_slug', 'urls']
 
 
-            
-
 class MembershipSerializer(serializers.ModelSerializer):
 
     class Meta:
