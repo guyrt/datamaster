@@ -56,7 +56,7 @@ class ClientDataSetSerializer(serializers.ModelSerializer):
 
     local_machine_guid = serializers.CharField()
 
-    facts = ClientDataSetFactSerializer(many=True)
+    facts = ClientDataSetFactSerializer(many=True, source='get_active_facts')
 
     def validate(self, data):
         if not has_access(data['user'], data['team']):

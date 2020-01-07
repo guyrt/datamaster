@@ -62,6 +62,9 @@ class ClientDataSet(DataMasterModelBaseMixin):
     # guid from originator of a dataset
     local_machine_guid = models.CharField(max_length=36)
 
+    def get_active_facts(self):
+        return self.facts.filter(is_active=1)
+
     class Meta:
         constraints = [
             models.UniqueConstraint (
