@@ -124,13 +124,13 @@ class DataMasterCache(object):
         """ ensure that there isn't a file that shares name with this project """
         project_parts = project_name.split('.')
         project_subname = '.'.join(project_parts[:-1])
-        if DataSet.select().where(DataSet.project == project_subname and DataSet.name == project_parts[-1]).count() > 0:
+        if DataSet.select().where(DataSet.project == project_subname, DataSet.name == project_parts[-1]).count() > 0:
             raise DataSetNameCollision("{0} is a project and can't be used as a filename.".format(project_name))
 
     def set_as_default(self, dataset):
         """ Set default to true for this data set, and default to false for all others on branch. """
         q = DataSet.update({DataSet.is_default: False}).where(
-            DataSet.project == dataset.project and DataSet.name == dataset.name and DataSet.branch == dataset.branch
+            DataSet.project == dataset.project, DataSet.name == dataset.name, DataSet.branch == dataset.branch
         )
         q.execute()
         q = DataSet.update({DataSet.is_default: True}).where(DataSet.id == dataset.id)

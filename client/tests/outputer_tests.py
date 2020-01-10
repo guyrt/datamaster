@@ -144,5 +144,21 @@ class OutputTests(DMTestBase):
         self.assertRaises(DataSetNameCollision, new_out.f1.f2.__fspath__)
         self.assertRaises(DataSetNameCollision, new_out.p1.p2.f2.f3.__fspath__)
 
+    def test_is_default_on_three_files(self):
+        # Set is_default on separate files
+        dm1 = dm.out.f1(meta={'a': 1}).__fspath__()
+        dm2 = dm.out.f2(meta={'a': 1}).__fspath__()
+        dm1_second = dm.out.f1(meta={'a': 2}).__fspath__()
+
+        datasets = list(DataSet.select())
+        self.assertFalse(datasets[0].is_default)
+        self.assertTrue(datasets[1].is_default)
+        self.assertTrue(datasets[2].is_default)
+
+        # Getting dm1 should return second copy.
+        dm1_output = dm.inputs.f1
+        self.assertEqual('{"a": 2}', dm1_output._dataset.get_metaargs_str())
+
+
 if __name__ == '__main__':
     unittest.main()
