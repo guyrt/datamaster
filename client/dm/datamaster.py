@@ -50,8 +50,8 @@ class WriteableFileName(os.PathLike):
         return new_writeable
 
     def __str__(self):
-        full_path, _, _, _ = self._get_path()
-        return full_path
+        """If something tries to make a string, treat it as a file."""
+        return self.__fspath__()
 
     def _get_path(self):
         datasetname = self._name[-1]

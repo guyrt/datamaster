@@ -39,10 +39,11 @@ _track.add_argument("--keepext", dest='keepext', action='store_true', help="Keep
 _track.add_argument("file")
 _track.add_argument("name", help="Project and name of the dataset in project.subproject.datasetname format.")
 
-args = dm_parser.parse_args()
+def main():
+    args = dm_parser.parse_args()
 
-if not vars(args) or not args.action:
-    dm_parser.print_help()
-    sys.exit(0)
+    if not vars(args) or not args.action:
+        dm_parser.print_help()
+        sys.exit(0)
 
-args.func(args)
+    args.func(args)

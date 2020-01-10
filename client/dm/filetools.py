@@ -45,6 +45,8 @@ def copy_file(from_file, to_file):
 def get_clean_filename(iframe):
     """ Get a clean filename from the frame that called into DataMaster. """
     rawpath = iframe.f_code.co_filename
+    if rawpath.startswith('<') and rawpath.endswith('>'):
+        return settings.cmdline_filename
     full_path = os.path.abspath(rawpath)
     return full_path
 

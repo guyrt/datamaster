@@ -3,3 +3,4 @@
  
 if __name__ == '__main__':
     import dm.cmdline.cmds
+    dm.cmdline.cmds.main()

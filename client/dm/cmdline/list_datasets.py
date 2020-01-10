@@ -1,6 +1,7 @@
 # Inspection utilities for local use.
 
 from dm.models import DataSet
+import string
 
 
 def list_datasets():
@@ -19,6 +20,7 @@ def list_datasets():
     
 def _datasets_to_string(dataset_grouping):
     s = ''
+
     for project, datasets in dataset_grouping.items():
         s += "Project: {0}\n".format(project)
         for dataset_name, dataset_objs in datasets.items():
@@ -31,6 +33,8 @@ def _datasets_to_string(dataset_grouping):
 def _single_dataset_to_string(dataset):
     s = "* " if dataset.is_default else "  "
     s += str(dataset.get_local_filename())
+    if dataset.metaarg_guid:
+        s += "\n        {0}".format(dataset.get_metaargs_str(charlimit=100))
     return s
 
 
