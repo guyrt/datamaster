@@ -22,6 +22,8 @@ az postgres server firewall-rule create --resource-group datamasterStage --serve
 
 az postgres server firewall-rule create --resource-group datamasterStage --server-name datamasterPGsql --start-ip-address=73.140.87.0 --end-ip-address=73.140.87.255 --name AllowRiguyHomeAccess
 
+az postgres server firewall-rule create --resource-group datamasterStage --server-name datamasterPGsql --start-ip-address=73.140.87.0 --end-ip-address=131.107.147.168 --name AllowRiguyHomeAccess2
+
 psql -h datamasterpgsql.postgres.database.azure.com -U dmadmin@datamasterpgsql postgres
 
 Postgres commands (staging)
@@ -32,7 +34,19 @@ postgres=> create user datamastermanager with password '';
 CREATE ROLE
 postgres=> GRANT ALL PRIVILEGES ON DATABASE datamastersync TO datamastermanager;
 
+Start creating the app service
 
+az appservice plan create --name datamasterStagingAppService --resource-group datamasterStage --sku F1 --is-linux
+
+az webapp create --resource-group datamasterStage --plan datamasterStagingAppService --name datamasterStage --runtime "PYTHON|3.7" --deployment-local-git
+
+az webapp config appsettings set --name datamasterStage --res-group datamasterStage --settings DBHOST="datamasterpgsql.postgres.databasource-group datamasterStage --settings DBHOST="datamasterpgsql.postgres.databaE=""se.azure.com" DBUSER="datamastermanager@datamasterpgsql" DBPASS="gL9@i6jXIHHfU" DBNAME="datamastersync"
+
+This is your deploy (maybe add 443?)
+git remote add azure https://dmDeployUser@datamasterstage.scm.azurewebsites.net/datamasterStage.git
+
+
+# 2Yh81iuE7&C^6
 
 {
   "administratorLogin": "dmadmin",
