@@ -146,9 +146,9 @@ class OutputTests(DMTestBase):
 
     def test_is_default_on_three_files(self):
         # Set is_default on separate files
-        dm1 = dm.out.f1(meta={'a': 1}).__fspath__()
-        dm2 = dm.out.f2(meta={'a': 1}).__fspath__()
-        dm1_second = dm.out.f1(meta={'a': 2}).__fspath__()
+        dm.out.f1(meta={'a': 1}).__fspath__()
+        dm.out.f2(meta={'a': 1}).__fspath__()
+        dm.out.f1(meta={'a': 2}).__fspath__()
 
         datasets = list(DataSet.select())
         self.assertFalse(datasets[0].is_default)

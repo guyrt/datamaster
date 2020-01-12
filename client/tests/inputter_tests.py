@@ -57,6 +57,19 @@ class InputTests(DMTestBase):
         self.assertEqual(dm.inputs.f3().__fspath__(), fpath4, "Get default path by create order")
         self.assertEqual(dm.inputs.f3(meta={'arg': 2}).__fspath__(), fpath3, "Get default by args")
 
+    def test_get_right_datetime(self):
+        fpath1 = dm.out.f1(timepath='2020/01/03').__fspath__()
+        fpath2 = dm.out.f1(timepath='2020/01/04').__fspath__()
+
+        # get the most recent
+        default_path = dm.inputs.f1().__fspath__()
+        self.assertIn('04', default_path)
+
+        path_02 = dm.inputs.f1(timepath='2020/01/04').__fspath__()
+        self.assertIn('04', path_02)
+        path_01 = dm.inputs.f1(timepath='2020/01/03').__fspath__()
+        self.assertIn('03', path_01)
+
 
 if __name__ == '__main__':
     unittest.main()
