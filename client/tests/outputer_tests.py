@@ -13,7 +13,7 @@ class OutputTests(DMTestBase):
         self.assertEqual(DataSet.select().count(), 1)
 
     def test_create_file(self):
-        file_path = dm.out.testfile.__fspath__()
+        file_path = dm.outputs.testfile.__fspath__()
         self.assertEqual(os.path.split(file_path)[1], 'testfile')
 
         self.state_check()
@@ -26,7 +26,7 @@ class OutputTests(DMTestBase):
         self.assertIsNone(dataset.get_fact('metaargfilename'))  # is None because we didn't declare metaargs or format
 
     def test_create_file_with_filetype(self):
-        file_path = dm.out.testfile(extension='json').__fspath__()
+        file_path = dm.outputs.testfile(extension='json').__fspath__()
         self.assertEqual(os.path.split(file_path)[1], 'testfile.json')
 
         self.state_check()
@@ -39,7 +39,7 @@ class OutputTests(DMTestBase):
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
 
     def test_create_file_with_timefield(self):
-        file_path = dm.out.testfile(timepath='2019/11/03').__fspath__()
+        file_path = dm.outputs.testfile(timepath='2019/11/03').__fspath__()
         file_path = file_path.replace('\\', '/')
         self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile'))
         
@@ -53,7 +53,7 @@ class OutputTests(DMTestBase):
         self.assertIsNone(dataset.get_fact('metaargfilename'))
 
     def test_create_file_with_timefield_extra_slash(self):
-        file_path = dm.out.testfile(timepath='2019/11/03/').__fspath__()
+        file_path = dm.outputs.testfile(timepath='2019/11/03/').__fspath__()
         file_path = file_path.replace('\\', '/')
         self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile'))
 
@@ -67,7 +67,7 @@ class OutputTests(DMTestBase):
         self.assertIsNone(dataset.get_fact('metaargfilename'))
 
     def test_create_file_with_timefield_and_project(self):
-        file_path = dm.out.project.testfile(timepath='2019/11/03', extension='json').__fspath__()
+        file_path = dm.outputs.project.testfile(timepath='2019/11/03', extension='json').__fspath__()
         file_path = file_path.replace('\\', '/')
         self.assertTrue(file_path.endswith('project/testfile/2019/11/03/testfile.json'))
         
@@ -81,7 +81,7 @@ class OutputTests(DMTestBase):
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
 
     def test_create_file_with_timefield_and_filetype(self):
-        file_path = dm.out.testfile(timepath='2019/11/03', extension='json').__fspath__()
+        file_path = dm.outputs.testfile(timepath='2019/11/03', extension='json').__fspath__()
         file_path = file_path.replace('\\', '/')
         self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile.json'))
         
@@ -95,9 +95,9 @@ class OutputTests(DMTestBase):
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
 
     def test_create_twofiles_with_formats(self):
-        file_path_json = dm.out.testfile(extension='json').__fspath__()
+        file_path_json = dm.outputs.testfile(extension='json').__fspath__()
         self.assertEqual(os.path.split(file_path_json)[1], 'testfile.json')
-        file_path = dm.out.testfile.__fspath__()
+        file_path = dm.outputs.testfile.__fspath__()
         self.assertEqual(os.path.split(file_path)[1], 'testfile')
 
         datasets = [f for f in DataSet.select().where(DataSet.name == 'testfile').order_by(DataSet.id)]
@@ -119,26 +119,26 @@ class OutputTests(DMTestBase):
         self.assertIsNone(dataset2.get_fact('metaargfilename'))  # is None because we didn't declare metaargs or format
 
     def test_create_file_with_metaargs(self):
-        t = dm.out.f1(meta={'a': 1})
+        t = dm.outputs.f1(meta={'a': 1})
         f1path1 = t.__fspath__()
-        f1path2 = dm.out.f1(meta={'a': 2}).__fspath__()
+        f1path2 = dm.outputs.f1(meta={'a': 2}).__fspath__()
 
         self.assertNotEqual(f1path1, f1path2, "Different args implies different files")
 
     def test_create_file_with_metaargs_same_but_diff_order(self):
-        t = dm.out.f1(meta={'a': 1, 'b': 2e-5})
+        t = dm.outputs.f1(meta={'a': 1, 'b': 2e-5})
         f1path1 = t.__fspath__()
-        f1path2 = dm.out.f1(meta={'b': 2e-5, 'a': 1}).__fspath__()
+        f1path2 = dm.outputs.f1(meta={'b': 2e-5, 'a': 1}).__fspath__()
 
         self.assertEqual(f1path1, f1path2, "Same args implies same files")
 
     def test_declare_file_then_project_same_time_same_name_fails(self):
-        dm.out.f1.__fspath__()
-        self.assertRaises(DataSetNameCollision, dm.out.f1.f2.__fspath__)
+        dm.outputs.f1.__fspath__()
+        self.assertRaises(DataSetNameCollision, dm.outputs.f1.f2.__fspath__)
 
     def test_declare_file_then_project_same_later_same_name_fails(self):
-        dm.out.f1.__fspath__()
-        dm.out.p1.p2.f2.__fspath__()
+        dm.outputs.f1.__fspath__()
+        dm.outputs.p1.p2.f2.__fspath__()
         new_out = dm.DataMasterOutput()
         # try to make a project with original filename
         self.assertRaises(DataSetNameCollision, new_out.f1.f2.__fspath__)
@@ -146,9 +146,9 @@ class OutputTests(DMTestBase):
 
     def test_is_default_on_three_files(self):
         # Set is_default on separate files
-        dm.out.f1(meta={'a': 1}).__fspath__()
-        dm.out.f2(meta={'a': 1}).__fspath__()
-        dm.out.f1(meta={'a': 2}).__fspath__()
+        dm.outputs.f1(meta={'a': 1}).__fspath__()
+        dm.outputs.f2(meta={'a': 1}).__fspath__()
+        dm.outputs.f1(meta={'a': 2}).__fspath__()
 
         datasets = list(DataSet.select())
         self.assertFalse(datasets[0].is_default)

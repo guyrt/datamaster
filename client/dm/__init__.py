@@ -6,7 +6,7 @@ from .settings import settings
 
 import atexit
 
-out = DataMasterOutput()
+outputs = DataMasterOutput()
 
 if not os.path.exists(settings.fileroot):
     os.makedirs(settings.fileroot)

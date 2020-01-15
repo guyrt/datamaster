@@ -36,19 +36,19 @@ Let's modify this program to use DM to manage the output:
 .. code:: python
 
     import json 
-    from dm import out
+    from dm import outputs
     my_data = json.dumps([{'id': 1, 'age': 33'}])
-    fh = open(out.ages, "w")
+    fh = open(outputs.ages, "w")
     fh.write(my_data)
     fh.close()
 
-The snippet ``out.ages`` creates a data set called "ages" (we'll
+The snippet ``outputs.ages`` creates a data set called "ages" (we'll
 discuss namespacing soon) and creates a filename for python to open.
 
 If you hate surprises (I do!) and don't fully trust magic 
 (I don't) then this section should dispel that 
 concern. Here's what really 
-happened when we used ``out.ages``.
+happened when we used ``outputs.ages``.
 
 First, DM recorded a new dataset called ``ages``. You can put that
 dataset in a project, which we'll cover later. This dataset will 
@@ -96,12 +96,12 @@ DM handles that for you:
 
 .. code-block:: python
 
-    from dm import out
+    from dm import outputs
 
     lrs = [1e-5, 2e-5, 3e-5]
     for lr in lrs:
         model = train_my_model(lr)
-        model.save(out.model(metaargs={'lr': lr}))
+        model.save(outputs.model(metaargs={'lr': lr}))
 
 In this case, DM saved three different files: one file for every unique metaargs value.
 
@@ -109,9 +109,9 @@ When you refer back to these three files, you can access them by the value of th
 
 .. code-block:: python
 
-    from dm import input
+    from dm import inputs
 
-    model = pytorch.load(input.model(metaargs={'lr': 1e-5}))
+    model = pytorch.load(inputs.model(metaargs={'lr': 1e-5}))
     model.eval()
     ...
 
@@ -120,8 +120,8 @@ You can do that by augmenting the dataset:
 
 .. code-block:: python
 
-    from dm import out
-    fh = open(out.model(extension='pt'))
+    from dm import outputs
+    fh = open(outputs.model(extension='pt'))
 
 While DM still controls where the file goes, we will append ".pt".
 

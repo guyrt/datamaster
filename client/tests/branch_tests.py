@@ -20,9 +20,9 @@ class BranchTests(DMTestBase):
 
     def test_save_to_different_branch(self):
         original_branch = Branch.get()
-        f1 = dm.out.file.__fspath__()
+        f1 = dm.outputs.file.__fspath__()
         set_branch("test")
-        f2 = dm.out.file.__fspath__()
+        f2 = dm.outputs.file.__fspath__()
 
         self.assertNotEqual(f1, f2)
         datasets = [f for f in DataSet.select().order_by(DataSet.id)]
