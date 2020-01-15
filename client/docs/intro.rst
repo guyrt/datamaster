@@ -121,7 +121,7 @@ You can do that by augmenting the dataset:
 .. code-block:: python
 
     from dm import out
-    fh = open(out.model(format='pt'))
+    fh = open(out.model(extension='pt'))
 
 While DM still controls where the file goes, we will append ".pt".
 
@@ -154,7 +154,7 @@ Docstrings work as expected:
 
     >>> ?inputs.myproject.weights
     In [5]: ?inputs.withtime.model
-    Signature:   inputs.myproject.model(format=None, meta=None, timepath='')
+    Signature:   inputs.myproject.model(extension=None, meta=None, timepath='')
     Type:        ReadableFileName
     String form: Dataset myproject.model at ~\.datamaster\data\master\withtime\model\2019\11\04\model
     File:        [omitted]\datamaster\client\dm\readablefile.py

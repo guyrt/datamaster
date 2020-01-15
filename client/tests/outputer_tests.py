@@ -26,7 +26,7 @@ class OutputTests(DMTestBase):
         self.assertIsNone(dataset.get_fact('metaargfilename'))  # is None because we didn't declare metaargs or format
 
     def test_create_file_with_filetype(self):
-        file_path = dm.out.testfile(format='json').__fspath__()
+        file_path = dm.out.testfile(extension='json').__fspath__()
         self.assertEqual(os.path.split(file_path)[1], 'testfile.json')
 
         self.state_check()
@@ -67,7 +67,7 @@ class OutputTests(DMTestBase):
         self.assertIsNone(dataset.get_fact('metaargfilename'))
 
     def test_create_file_with_timefield_and_project(self):
-        file_path = dm.out.project.testfile(timepath='2019/11/03', format='json').__fspath__()
+        file_path = dm.out.project.testfile(timepath='2019/11/03', extension='json').__fspath__()
         file_path = file_path.replace('\\', '/')
         self.assertTrue(file_path.endswith('project/testfile/2019/11/03/testfile.json'))
         
@@ -81,7 +81,7 @@ class OutputTests(DMTestBase):
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
 
     def test_create_file_with_timefield_and_filetype(self):
-        file_path = dm.out.testfile(timepath='2019/11/03', format='json').__fspath__()
+        file_path = dm.out.testfile(timepath='2019/11/03', extension='json').__fspath__()
         file_path = file_path.replace('\\', '/')
         self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile.json'))
         
@@ -95,7 +95,7 @@ class OutputTests(DMTestBase):
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
 
     def test_create_twofiles_with_formats(self):
-        file_path_json = dm.out.testfile(format='json').__fspath__()
+        file_path_json = dm.out.testfile(extension='json').__fspath__()
         self.assertEqual(os.path.split(file_path_json)[1], 'testfile.json')
         file_path = dm.out.testfile.__fspath__()
         self.assertEqual(os.path.split(file_path)[1], 'testfile')

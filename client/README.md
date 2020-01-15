@@ -27,8 +27,6 @@ jordan! - would be honest
 niki - challenge to explain but very critical
 kenya
 
-get danielle to schedule with keith and the other woman.
-
 our system really 
 
 

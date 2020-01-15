@@ -25,9 +25,9 @@ class WriteableFileName(os.PathLike):
 
         self._calling_filename = calling_filename
 
-    def __call__(self, format=None, timepath=None, meta=None):
-        if format:
-            self._filesuffix = format
+    def __call__(self, extension=None, timepath=None, meta=None):
+        if extension:
+            self._filesuffix = extension
         if meta:
             self._metaargs = meta
         if timepath:

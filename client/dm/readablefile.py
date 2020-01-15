@@ -86,9 +86,9 @@ class ReadableFileName(os.PathLike):
     def metaargs(self):
         return self._dataset.load_metaargs()
 
-    def __call__(self, format=None, meta=None, timepath=''):
+    def __call__(self, extension=None, meta=None, timepath=''):
         timepath = timepath or self._timepath
-        new_dataset = cache.get_dataset_by_args(self._dataset, format, meta, timepath)
+        new_dataset = cache.get_dataset_by_args(self._dataset, extension, meta, timepath)
         if not new_dataset:
             raise ValueError("No dataset found for arguments")
         if new_dataset.id == self._dataset.id:
