@@ -2,6 +2,8 @@ import os
 import yaml
 
 default_branch = "master"
+default_authentication_path = '/gettoken/'
+default_user_details_path = '/user/[UserSlug]'
 
 user_root = os.path.expanduser("~")
 user_path = os.path.join(user_root, '.datamaster/')
@@ -42,7 +44,7 @@ class _RemotesCache(object):
         try:
             return f['remotes'][remote_name]
         except KeyError:
-            print("No remote found for {0}".format(remote_name))
+            raise KeyError("No remote found for {0}".format(remote_name))
 
     def _get_empty_config(self):
         """ Set up default remote. The initial remote only has the gettoken, which lets one
@@ -51,14 +53,7 @@ class _RemotesCache(object):
 
         return {
             'remotes': {
-                'origin': {
-                    'location': 'http://127.0.0.1:8000',
-                    'urls': {
-                        'remote_authentication': '/gettoken/',
-                        'remote_user_details': '/user/[UserSlug]'
-                    },
-                    'teams': {}
-                }
+                'origin': create_remote('http://127.0.0.1:8000')
             }
         }
 
@@ -90,8 +85,45 @@ class _RemotesCache(object):
             f['remotes'][remote_name]['teams'][team_slug]['urls'].update(team['urls'])
         self.save(f)
 
+    def add_remote(self, remote_name, remote_location, username, team_info, token):
+        """Create a new remote and update with username and url info.
+
+        The result of this operation should be that a remote is stored in
+        the remotes file and is ready for authenticated use.
+        """
+        f = self.get_file()
+        if remote_name in f['remotes']:
+            raise ValueError("Cannot add remote {0}. It already exists. Try 'remote edit' to change it".format(remote_name))
+        new_remote = create_remote(remote_location)
+        new_remote['token'] = token
+        new_remote['username'] = username
+        for team in team_info:
+            team_slug = team['team_slug']
+            new_remote['teams'][team_slug] = {
+                'urls': team['urls']
+            }
+        f['remotes'][remote_name] = new_remote
+        self.save(f)
+
+
+def create_remote(location):
+    return {
+        'location': location,
+        'urls': {
+            'remote_authentication': default_authentication_path,
+            'remote_user_details': default_user_details_path
+        },
+        'teams': {}
+    }
+
 
 class _Settings(object):
+
+    saveable_attributes = (
+        'fileroot', 'metadata_fileroot', 'codecopy_fileroot',
+        'local_database', 'active_remote', 'active_remote_team',
+        'active_branch', 'active_remote_user'
+    )
 
     fileroot = os.path.join(user_path, 'data')
     metadata_fileroot =  os.path.join(fileroot, '_metadata')
@@ -99,23 +131,21 @@ class _Settings(object):
 
     local_database = os.path.join(user_path, 'dbmaster.db')
 
-    # This should not be overridden and is not saved by default.
-    # Credentials always flow from the user.
-    local_credentials_file = os.path.join(user_path, 'remotes')
-
     active_remote = 'origin'
     active_remote_team = 'datamastertest'
     active_branch = default_branch
     active_remote_user = 'guyrt'
 
+    #
     # rarely updated by users
+    # 
 
     # Used by the track cmd line option as the creating filename.
     cmdline_filename = "[cmdline]"
 
-    def save(self):
-        """ Save from location that was used to load settings """
-        print("TODO persist")
+    # This should not be overridden and is not saved by default.
+    # Credentials always flow from the user.
+    local_credentials_file = os.path.join(user_path, 'remotes')
 
     def save_token(self, username, token_value, team_info):
         # todo - handle team_slugs.
@@ -125,6 +155,12 @@ class _Settings(object):
         # if >1 and global settings then ask with option to keep current if it exists.
         token_handler = _RemotesCache(self.local_credentials_file)
         token_handler.update_remote(self.active_remote, username, team_info, token_value)
+
+    def add_remote(self, remote_name, remote_host, username, team_info, token):
+        token_handler = _RemotesCache(self.local_credentials_file)
+        token_handler.add_remote(remote_name, remote_host, username, team_info, token)
+        self.active_remote = remote_name
+        self.save()
 
     def retrieve_token(self):
         """ Retrieve token based on active remote team and remote user """
@@ -148,6 +184,13 @@ class _Settings(object):
             setattr(s, k, v)
         return s
 
+    def save(self):
+        """ Save from location that was used to load settings """
+        fh = open(get_metadata_in_root(), 'w')
+        raw_dict = {k: getattr(self, k) for k in self.saveable_attributes}
+        yaml.dump(raw_dict, fh)
+        fh.close()
+
 
 def get_metadata_in_root():
     cur_dir = os.path.abspath(os.path.curdir)
@@ -158,17 +201,15 @@ def get_metadata_in_root():
             return f
         previous_dir = cur_dir
         cur_dir = os.path.split(cur_dir)[0]
-    return None
+    settings_file = os.path.join(user_path, dm_settings_filename)
+    return settings_file
 
 
 def build_settings():
     settings_file = get_metadata_in_root()
-    if not settings_file:
-        # Didn't exist - use user folder
-        settings_file = os.path.join(user_path, dm_settings_filename)
-        if not os.path.exists(settings_file):
-            # No settings anywhere. Load from defaults.
-            return _Settings()  
+    if not os.path.exists(settings_file):
+        # No settings anywhere. Load from defaults.
+        return _Settings()  
     return _Settings.load(open(settings_file, 'r'))
 
 

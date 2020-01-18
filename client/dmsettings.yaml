@@ -1,5 +1,8 @@
-fileroot: "C:/Users/riguy/.datamaster/data/"
-metadata_fileroot: "C:/Users/riguy/.datamaster/data/_metadata"
-local_database: 'C:/users/riguy/.datamaster/dbmaster.db'
-
-active_branch: 'master'
+active_branch: master
+active_remote: staging3
+active_remote_team: datamastertest
+active_remote_user: guyrt
+codecopy_fileroot: C:\Users\riguy\.datamaster/data\_codecopy
+fileroot: C:/Users/riguy/.datamaster/data/
+local_database: C:/users/riguy/.datamaster/dbmaster.db
+metadata_fileroot: C:/Users/riguy/.datamaster/data/_metadata

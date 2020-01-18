@@ -2,7 +2,7 @@
 import sys
 import argparse
 
-from .remote_login import login
+from .remote_login import login, add_remote
 from ..syncing import sync
 from .list_datasets import list_datasets
 from .track import track_existing_path
@@ -20,6 +20,12 @@ _login.add_argument("-p", "--password", dest="password", type=str, help='Leave b
 
 # Remote
 _remote = _subparsers.add_parser("remote", help="Manage remote server")
+_remote_sub = _remote.add_subparsers(title="Remote subcommands", dest="remote_action")
+_remote_add = _remote_sub.add_parser("add", help="Add a new remote server")
+_remote_add.set_defaults(func=lambda x: add_remote(x))
+_remote_add.add_argument('name')
+_remote_add.add_argument('host', help="like https://www.datamaster.com")
+_remote_add.add_argument("-u", "--username", dest="username", type=str, help='Remote username', required=False)
 
 # Sync
 _sync = _subparsers.add_parser("sync", help="Sync to remote server")
