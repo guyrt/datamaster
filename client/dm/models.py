@@ -46,6 +46,9 @@ class DataSetFactKeys(object):
     GitCommitAuthor = 'git_commit_author'
     GitCommitAuthoredDatetime = 'git_commit_authored_datetime'
 
+    # Not stored in DB locally - used to send to server
+    CodeCopyContent = 'code_copy_contents'
+
 
 class BranchSyncableState(object):
 
