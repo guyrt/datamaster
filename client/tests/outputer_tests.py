@@ -24,6 +24,7 @@ class OutputTests(DMTestBase):
         self.assertEqual(os.path.split(dataset.get_fact('localpath'))[1], 'testfile')
         self.assertTrue(dataset.get_fact('calling_filename').endswith('outputer_tests.py'))
         self.assertIsNone(dataset.get_fact('metaargfilename'))  # is None because we didn't declare metaargs or format
+        self.assertEqual(0, dataset.last_server_version)
 
     def test_create_file_with_filetype(self):
         file_path = dm.outputs.testfile(extension='json').__fspath__()

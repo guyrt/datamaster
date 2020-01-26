@@ -55,4 +55,12 @@ def _push_dataset(dataset):
         print(response.content)
         return False
 
+    # update local information about latest server version
+    _update_latest_server_version(dataset, response.json()['latest_server_version'])
+
     return True
+
+
+def _update_latest_server_version(dataset, latest_version):
+    dataset.last_server_version = latest_version
+    dataset.save()

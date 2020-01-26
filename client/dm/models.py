@@ -85,6 +85,8 @@ class DataSet(Model):
     last_modified_time = DateTimeField(default=datetime.datetime.now)
     is_default = BooleanField(default=True)
 
+    last_server_version = IntegerField(default=0)
+
     class Meta:
         database = db
         indexes = (

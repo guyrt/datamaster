@@ -31,6 +31,7 @@ class DataSetSerializer(object):
             'timepath': dataset.timepath,
             'branch': dataset.branch.name,
             'local_machine_guid': dataset.guid,
+            'latest_server_version': dataset.last_server_version,
             'facts': clientdataset_serialized
         }
 
