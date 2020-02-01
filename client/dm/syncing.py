@@ -1,5 +1,6 @@
 import requests
 
+
 from .models import DataSetRemoteSync, DataSetRemoteSyncStates
 from .serializers import DataSetSerializer
 from .settings import settings
@@ -20,12 +21,12 @@ def create_stale_syncs(dataset):
             d.save()
 
 
-def sync(args):
+def push(args):
     """
-    Perform sync for every local, stale dataset.
+    Perform push for every local, stale dataset.
     """
     need_sync = DataSetRemoteSync.select()
-    if not args.force_sync:
+    if not args.force_push:
         need_sync = need_sync.where(DataSetRemoteSync.sync_state==DataSetRemoteSyncStates.Stale)
     updates = 0
     for dataset_sync_state in need_sync:
@@ -64,3 +65,34 @@ def _push_dataset(dataset):
 def _update_latest_server_version(dataset, latest_version):
     dataset.last_server_version = latest_version
     dataset.save()
+
+
+def pull(args):
+    """ Download datasets from server.
+    """
+    remote_obj = settings.retrieve_remote()
+    headers = {'Authorization': 'Token {0}'.format(remote_obj['token']), 'Content-type': 'application/json'}
+    team = remote_obj['teams'][settings.active_remote_team]
+    url = remote_obj['location'] + team['urls']['dataset_sync']
+
+    response = requests.get(url, headers=headers)
+    for dataset_json in response.json():
+        _perform_pull(dataset_json)
+
+
+def _perform_pull(dataset_json):
+    """ Perform pull operation on a single dataset 
+
+    If there is no matching dataset, then create one.
+    If there is a matching dataset and:
+        the local copy is synced with same number then ignore
+        the local copy is synced with version lower number then update
+        the local copy is unsynced then ignore and log error
+    """
+    from .cache import cache  # looped reference :(
+    local_dataset = cache.get_dataset_by_kwargs(**dataset_json)
+    if not local_dataset:
+        # create
+        pass        
+    else:
+        pass

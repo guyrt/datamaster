@@ -61,6 +61,22 @@ class DataMasterCache(object):
         except DoesNotExist:
             return None
 
+    def get_dataset_by_kwargs(self, name, project, branch, timepath, metaargs_guid, **kwargs):
+        """
+        Convenience function to find a dataset based on kwargs.
+
+        kwargs are not used, but allow calling from json representation of a dataset.
+        """
+        try:
+            return DataSet.get(
+                name=name,
+                project=project,
+                branch=branch,
+                timepath=timepath,
+                metaarg_guid=metaargs_guid)
+        except DoesNotExist:
+            return None
+
     def get_or_create_dataset(self, name, path, metadata_path, project, calling_filename, timepath, file_extension, meta_args, previousfilereads):
         timepath = timepath or ''  # convert null to string empty.
         meta_args = self._combine_args(meta_args, file_extension)
@@ -85,6 +101,9 @@ class DataMasterCache(object):
                 DataSetFactKeys.LocalMachine: socket.getfqdn(),
                 DataSetFactKeys.LocalUsername: getpass.getuser()
             }
+            if file_extension:
+                params_to_update[DataSetFactKeys.FileExtension] = file_extension
+
             params_to_purge = []
 
             if meta_args:

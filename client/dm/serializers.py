@@ -1,4 +1,5 @@
-from .models import DataSetFact, DataSetFactKeys
+from .filetools import make_paths
+from .models import DataSet, DataSetFact, DataSetFactKeys
 
 
 class DataSetFactSerializer(object):
@@ -37,7 +38,39 @@ class DataSetSerializer(object):
 
     def from_dict(self, d):
         """ Rehydrates the DataSet, combining local knowledge with overrides from server """
-        raise NotImplementedError()
+        
+        filesuffix = ''
+        for key, value in d['facts'].items():
+            pass
+
+        # full_path, metadata_path, codecopy_path = make_paths(
+        #     d['name'],
+        #     d['project'],
+        #     d['timepath'], , d['metaarg_guid'])
+
+        dataset = DataSet.create(
+            name=d['name'],
+            project=d['project'],
+            metaarg_guid=d['metaargs_guid'],
+            timepath=d['timepath'],
+            branch=d['branch'],
+            last_server_version=d['latest_server_version'],
+            local_machine_guid=d['local_machine_guid']
+        )
+
+        # todo - create state of remoteonly and use it.
+
+        for key, value in d['facts'].items():
+            if key == DataSetFactKeys.CodeCopyContent:
+                pass
+            else:
+                DataSetFact.create(
+                    dataset=dataset,
+                    key=key,
+                    value=value
+                )
+
+        return dataset
 
 
 def get_source_file(dataset):

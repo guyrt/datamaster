@@ -32,12 +32,13 @@ class DataSetFactKeys(object):
     CallingFilename = 'calling_filename'
     CallingFilenameContentHash = 'calling_filename_content_hash'
     CodeCopyFilename = 'code_copy_filename'
-    LocalPath = 'localpath'
-    State = 'state'
+    FileExtension = 'file_extension'
     LocalMachine = 'localmachine'
+    LocalPath = 'localpath'
     LocalUsername = 'localusername'
     MetaArgFileName = 'metaargfilename'
     PreviousFileReads = 'previousfilereads'
+    State = 'state'
 
     # Git facts
     GitRoot = 'git_root'

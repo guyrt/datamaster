@@ -2,7 +2,7 @@ import os
 import unittest
 
 from context import dm, db, DMTestBase
-from dm.models import DataSet
+from dm.models import DataSet, DataSetFactKeys
 from dm.cache import DataSetNameCollision
 
 
@@ -26,7 +26,7 @@ class OutputTests(DMTestBase):
         self.assertIsNone(dataset.get_fact('metaargfilename'))  # is None because we didn't declare metaargs or format
         self.assertEqual(0, dataset.last_server_version)
 
-    def test_create_file_with_filetype(self):
+    def test_create_file_with_extension(self):
         file_path = dm.outputs.testfile(extension='json').__fspath__()
         self.assertEqual(os.path.split(file_path)[1], 'testfile.json')
 
@@ -38,6 +38,7 @@ class OutputTests(DMTestBase):
         self.assertEqual(os.path.split(dataset.get_fact('localpath'))[1], 'testfile.json')
         self.assertTrue(dataset.get_fact('calling_filename').endswith('outputer_tests.py'))
         self.assertIsNotNone(dataset.get_fact('metaargfilename'))
+        self.assertEqual(dataset.get_fact(DataSetFactKeys.FileExtension), 'json')
 
     def test_create_file_with_timefield(self):
         file_path = dm.outputs.testfile(timepath='2019/11/03').__fspath__()

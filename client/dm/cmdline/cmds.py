@@ -3,7 +3,7 @@ import sys
 import argparse
 
 from .remote_login import login, add_remote
-from ..syncing import sync
+from ..syncing import push, pull
 from .list_datasets import list_datasets
 from .track import track_existing_path
 
@@ -28,10 +28,12 @@ _remote_add.add_argument('host', help="like https://www.datamaster.com")
 _remote_add.add_argument("-u", "--username", dest="username", type=str, help='Remote username', required=False)
 
 # Sync
-_sync = _subparsers.add_parser("sync", help="Sync to remote server")
-_sync.set_defaults(func=lambda x: sync(x))
-_sync.add_argument("--force", dest='force_sync', action='store_true')
-# Todo - likely want to sync to a specific remote.
+_push = _subparsers.add_parser("push", help="Push locally created files to remote server")
+_push.set_defaults(func=lambda x: push(x))
+_push.add_argument("--force", dest='force_push', action='store_true')
+
+_pull = _subparsers.add_parser("pull", help="Pull remote files from server")
+_pull.set_defaults(func=lambda x: pull(x))
 
 # List
 _list = _subparsers.add_parser("list", help="List local datasets")
