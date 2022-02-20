@@ -4,7 +4,7 @@ import os
 from .cache import cache
 from .events import global_event_handler
 from .filetools import make_folder, make_paths, get_clean_filename
-from .models import DatasetStates, DataSet
+from .models import DataSet
 from .settings import settings
 from .readablefile import inputs
 
@@ -49,7 +49,7 @@ class WriteableFileName(os.PathLike):
         self._is_project = True
         return new_writeable
 
-    def __str__(self):
+    def __str__(self) -> str:
         """If something tries to make a string, treat it as a file."""
         return self.__fspath__()
 
@@ -60,7 +60,7 @@ class WriteableFileName(os.PathLike):
         full_path, metadata_path, _ = make_paths(datasetname, project, self._timepath, self._filesuffix, hashed_metaargs)
         return full_path, metadata_path, datasetname, project
 
-    def __fspath__(self):
+    def __fspath__(self) -> str:
         full_path, metadata_path, datasetname, project = self._get_path()
         cache.check_project_isnt_file(project)
         make_folder(full_path)

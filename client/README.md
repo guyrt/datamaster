@@ -23,9 +23,6 @@ change list util:
 - dm list name should list the files/projects in that dataset. have a recursive command
 
 our system works fine for python workflows. how common are those? how would we work with things like direct S3 to S3 workloads?
-what engines like airflow do we support and how?
 what do we do with pyspark?
 
 *** - maybe we should keep a "filesystemtype" stamp that tracks differently? ***
-
-how important is it that we have this python easy demo?

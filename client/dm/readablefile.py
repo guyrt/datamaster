@@ -1,6 +1,6 @@
 import os
 from .cache import cache, get_timepaths_for_dataset
-from .models import DatasetStates, DataSet, ModelConstants
+from .models import DataSet, ModelConstants
 from .events import global_event_handler
 
 
@@ -121,9 +121,11 @@ class DataMasterInput(object):
             final_root._add_file(ReadableFileName(dataset))
 
     def _add_project(self, readable_project):
+        """Add an attribute for each project (basically a folder)."""
         setattr(self, readable_project._project_name, readable_project)
 
     def _add_file(self, readable_file):
+        """Add an attribute for each data file."""
         setattr(self, readable_file._name, readable_file)
 
 

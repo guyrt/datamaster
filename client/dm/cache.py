@@ -1,6 +1,5 @@
 import hashlib
 import os
-import sqlite3
 import uuid
 import datetime
 import socket
@@ -19,7 +18,7 @@ from .models import (
     DataSetFactKeys,
     bootstrap_database
 )
-from .settings import settings, default_branch
+from .settings import settings
 from .syncing import create_stale_syncs
 
 

@@ -26,7 +26,15 @@ command will make a local remote called ``origin``:
     Enter password for https://datamasterstage.azurewebsites.net:
     Saved remote https://datamasterstage.azurewebsites.net as origin and set to active. You should log in with 'sync'.
 
+**Using a remote**
 
-TODO - cover editing a remote
-cover removing a remote
-if you have many teams, resyncing will make sure they are all available.
+Alice and Bob are collaborating on an ML project with three steps. Each step outputs data somewhere. 
+
+Think through several scenarios:
+* running different scripts/branches/outputs
+* running a production system - how to keep separate files?
+* an airflow graph
+
+
+
+

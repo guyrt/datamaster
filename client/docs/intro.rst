@@ -9,7 +9,7 @@ After reading this document, you will have created your first data set with DM.
 
 **What is DataMaster?**
 DM is a tool to deal with data sets so you can focus on algorithms. 
-It lets you deal with data sets as objects not raw files. 
+It lets you created and manipulate data sets as objects not raw files. 
 Data objects can:
 
 - Be versioned, both by setting a branch like git and by storing 
