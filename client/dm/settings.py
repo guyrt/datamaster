@@ -1,4 +1,5 @@
 import os
+from typing import Any
 import yaml
 
 default_branch = "master"
@@ -147,6 +148,20 @@ class _Settings(object):
     # Credentials always flow from the user.
     local_credentials_file = os.path.join(user_path, 'remotes')
 
+    def __init__(self, file_name) -> None:
+        self._file_name = file_name
+        self._loaded = False
+        self._start_loading = False
+
+    def __getattribute__(self, __name: str) -> Any:
+        if __name.startswith('_'):
+            return super(_Settings, self).__getattribute__(__name)
+        if self._start_loading:
+            return super(_Settings, self).__getattribute__(__name)
+        if not self._loaded:
+            self._load()
+        return super(_Settings, self).__getattribute__(__name)
+        
     def save_token(self, username, token_value, team_info):
         # todo - handle team_slugs.
         # if only 1, and global settings with none set, then set it to that one.
@@ -172,20 +187,28 @@ class _Settings(object):
         return token_handler.retrieve_remote(self.active_remote)
 
     @staticmethod
-    def load(file_handle):
+    def lazy_load(file_name):
         """ Load settings from a file and return _Settings object """ 
-        raw_dict = yaml.full_load(file_handle)
-        s = _Settings()
+        s = _Settings(file_name)
+        return s
+
+    def _load(self):
+        self._start_loading = True
+        fh = open(self._file_name, 'r')
+        raw_dict = yaml.full_load(fh)
+
         for k, v in raw_dict.items():
             if k == 'local_credentials_file':
                 raise ValueError("Illegal to reset location of local_credentials_file")
-            if not hasattr(s, k):
+            if not hasattr(self, k):
                 raise ValueError("Unexpected key {0}".format(k))
-            setattr(s, k, v)
-        return s
+            setattr(self, k, v)
+        self._loaded = True
+        self._start_loading = False
 
     def save(self):
         """ Save from location that was used to load settings """
+        # todo - version these. don't destroy old settings (for debug)
         fh = open(get_metadata_in_root(), 'w')
         raw_dict = {k: getattr(self, k) for k in self.saveable_attributes}
         yaml.dump(raw_dict, fh)
@@ -210,7 +233,7 @@ def build_settings():
     if not os.path.exists(settings_file):
         # No settings anywhere. Load from defaults.
         return _Settings()  
-    return _Settings.load(open(settings_file, 'r'))
+    return _Settings.lazy_load(settings_file)
 
 
 # Todo - resolve file location from curdir. Start with current directory and work up the chain. if none then try user.

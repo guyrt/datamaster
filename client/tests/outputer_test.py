@@ -1,7 +1,8 @@
 import os
 import unittest
 
-from context import dm, db, DMTestBase
+from .context import DMTestBase
+import dm
 from dm.models import DataSet, DataSetFactKeys
 from dm.cache import DataSetNameCollision
 

@@ -1,6 +1,7 @@
 import unittest
 
-from .context import dm, DMTestBase
+from .context import DMTestBase
+import dm
 from dm.models import DataSet, Branch
 from dm.branch_utils import set_branch
 
@@ -14,12 +15,17 @@ class BranchTests(DMTestBase):
         dm.cache.cache.get_or_create_branch(dm.settings.active_branch)
         self.assertEqual(Branch.select().count(), 1, "Creating doesn't duplicate")
 
-        dm.cache.cache.get_or_create_branch("test")
+        dm.cache.cache.get_or_create_branch("newbranch")
+        self.assertEqual(Branch.select().count(), 2)
+
+        dm.cache.cache.get_or_create_branch("newbranch")
         self.assertEqual(Branch.select().count(), 2, "Creating doesn't duplicate")
+
 
     def test_save_to_different_branch(self):
         original_branch = Branch.get()
         f1 = dm.outputs.file.__fspath__()
+        
         set_branch("test")
         f2 = dm.outputs.file.__fspath__()
 

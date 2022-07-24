@@ -1,5 +1,7 @@
-from context import dm, db, DMTestBase
+from .context import DMTestBase
 import unittest
+
+import dm
 from dm.models import DataSet
 
 import pyarrow.parquet as pq
@@ -32,7 +34,6 @@ class ParquetTests(DMTestBase):
         table2 = pq.read_table(dm.inputs.parquettest.parquetlarge)
         df2 = table2.to_pandas()
         self.assertEqual(df.shape, df2.shape)
-
 
 
 if __name__ == '__main__':

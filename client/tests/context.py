@@ -1,20 +1,23 @@
 import os
 import shutil
+import mock
 
 import dm
 import unittest
 from peewee import SqliteDatabase
+from dm.settings import default_branch
 from dm.models import db, bootstrap_database
 
-
-dm.settings.fileroot = "/tmp/datamastertest/"
-dm.settings.metadata_fileroot = os.path.join(dm.settings.fileroot, '_metadata')
-dm.settings.codecopy_fileroot = os.path.join(dm.settings.fileroot, '_codecopy')
 
 class DMTestBase(unittest.TestCase):
     
     def setUp(self):
-        # Create and clear file
+        dm.settings.save = mock.MagicMock()
+
+        dm.settings.fileroot = "/tmp/datamastertest/"
+        dm.settings.metadata_fileroot = os.path.join(dm.settings.fileroot, '_metadata')
+        dm.settings.codecopy_fileroot = os.path.join(dm.settings.fileroot, '_codecopy')
+        dm.settings.active_branch = default_branch  # always start here.
         db.initialize(SqliteDatabase(":memory:"))
         bootstrap_database(db)
 
