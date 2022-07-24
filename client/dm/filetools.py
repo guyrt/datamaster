@@ -5,7 +5,6 @@ import git
 from .settings import settings
 
 
-
 def make_folder(full_path):
     """Ensure that a folder exists for a given path"""
     path_part = os.path.dirname(full_path)
@@ -28,13 +27,12 @@ def make_paths(datasetname, project, timepath, filesuffix, hashed_metaargs):
     relative_path = os.path.join(settings.active_branch, os.path.join(project), hashed_metaargs, filename)
     full_path = os.path.join(settings.fileroot, relative_path)
     metadata_path = os.path.join(settings.metadata_fileroot, relative_path)
-    codecopy_path = os.path.join(settings.codecopy_fileroot, relative_path)
 
     full_path = os.path.normpath(full_path)
     metadata_path = os.path.normpath(metadata_path)
-    codecopy_path = os.path.normpath(codecopy_path)
-
-    return full_path, metadata_path, codecopy_path
+    make_folder(metadata_path)
+    make_folder(full_path)
+    return full_path, metadata_path
 
 
 def copy_file(from_file, to_file):
@@ -64,7 +62,7 @@ def get_gitroot(full_path):
 
     return {
         'git_root': git_root,
-        'active_branch': git_repo.active_branch,
+        'active_branch': git_repo.active_branch.name,
         'commit_hexsha': current_commit.hexsha,
         'commit_author': current_commit.author,
         'commit_authored_datetime': current_commit.authored_datetime

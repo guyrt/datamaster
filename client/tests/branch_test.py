@@ -1,7 +1,6 @@
-import os
 import unittest
 
-from context import dm, db, DMTestBase
+from .context import dm, DMTestBase
 from dm.models import DataSet, Branch
 from dm.branch_utils import set_branch
 

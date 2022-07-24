@@ -1,6 +1,6 @@
-from context import dm, db, DMTestBase
+from .context import DMTestBase
+import dm
 import unittest
-from dm.models import DataSet
 
 
 class InputTests(DMTestBase):
@@ -28,7 +28,6 @@ class InputTests(DMTestBase):
 
     def test_two_with_args(self):
         """ Given two files with metaargs, select each one by name and by default """
-
         f1path1 = dm.outputs.f1(meta={'arg': 1}).__fspath__()
         f1path2 = dm.outputs.f1(meta={'arg': 2}).__fspath__()
 

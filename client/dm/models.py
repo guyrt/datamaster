@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from peewee import Model, CharField, ForeignKeyField, IntegerField, TextField, DoesNotExist, DateTimeField, BooleanField
 from peewee import DatabaseProxy
 import json
@@ -29,23 +30,10 @@ class DataSetFactKeys(object):
     Allowable fields for the key field in DataSetFact
     """
 
-    CallingFilename = 'calling_filename'
-    CallingFilenameContentHash = 'calling_filename_content_hash'
-    CodeCopyFilename = 'code_copy_filename'
     FileExtension = 'file_extension'
-    LocalMachine = 'localmachine'
     LocalPath = 'localpath'
-    LocalUsername = 'localusername'
     MetaArgFileName = 'metaargfilename'
-    PreviousFileReads = 'previousfilereads'
     State = 'state'
-
-    # Git facts
-    GitRoot = 'git_root'
-    GitActiveBranch = 'git_active_branch'
-    GitCommitHexSha = 'git_commit_hexsha'
-    GitCommitAuthor = 'git_commit_author'
-    GitCommitAuthoredDatetime = 'git_commit_authored_datetime'
 
     # Not stored in DB locally - used to send to server
     CodeCopyContent = 'code_copy_contents'
@@ -113,16 +101,9 @@ class DataSet(Model):
     def metaargs(self):
         return self._metaargs
 
-    def update_metaargs(self, metaargs, metadata_path=None):
+    def update_metaargs(self, metaargs):
         self._metaargs.update(metaargs)
         self.metaarg_guid = self.hash_metaarg(self._metaargs)
-        if metadata_path:
-            _dump_metaargs(self, metadata_path)
-
-    def save(self, *args, **kwargs):
-        """ Save then dump metaargs nearby. """
-        super(DataSet, self).save(*args, **kwargs)
-        _dump_metaargs(self)
 
     def get_fact(self, key):
         try:
@@ -136,11 +117,9 @@ class DataSet(Model):
     def get_metadata_filename(self):
         return self.get_fact(DataSetFactKeys.MetaArgFileName)
 
-    def get_local_machine_name(self):
-        return self.get_fact(DataSetFactKeys.LocalMachine)
-
     def load_metaargs(self):
         """If metargs are empty then try to reload from DB."""
+
         if self.metaargs:
             return self.metaargs
         s = self.get_metaargs_str()
@@ -168,7 +147,7 @@ class DataSet(Model):
         return txt
 
     @staticmethod
-    def hash_metaarg(metaargs):
+    def hash_metaarg(metaargs: Dict[Any, Any]):
         if metaargs:
             return hashlib.md5(repr(sorted(metaargs.items())).encode('utf-8')).hexdigest()
         else:
@@ -176,6 +155,8 @@ class DataSet(Model):
 
 
 class DataSetFact(Model):
+    """These facts are used for lookup. If the fact isn't needed
+    during input or dataset search then do not load it here."""
 
     dataset = ForeignKeyField(DataSet, backref='facts')
     key = CharField()
@@ -212,23 +193,6 @@ class DataSetRemoteSync(Model):
 
 
 models_list = (DataSet, DataSetFact, DataSetRemoteSync, Branch)
-
-
-def _dump_metaargs(dataset, dump_filename=None):
-    if not dataset.metaargs:
-        return
-    metaargs_str = json.dumps(dataset.metaargs)
-    if not dump_filename:
-        dump_filename = dataset.get_metadata_filename()
-    make_folder(dump_filename)
-    f = open(dump_filename, 'w')
-    f.write(metaargs_str)
-    f.close()
-    dsf, created = DataSetFact.get_or_create(dataset=dataset, key=DataSetFactKeys.MetaArgFileName, defaults={'value': dump_filename})
-    if not created:
-        dsf.value = dump_filename
-        dsf.save()
-    return dsf
 
 
 def bootstrap_database(db_instance):

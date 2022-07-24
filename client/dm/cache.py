@@ -2,17 +2,15 @@ import hashlib
 import os
 import uuid
 import datetime
-import socket
-import getpass
+
 from peewee import DoesNotExist, fn, SqliteDatabase
 
-from .filetools import make_paths, copy_file, get_gitroot
+from .filetools import copy_file
 from .models import (
     Branch,
     DataSet,
     DataSetFact, 
     db, 
-    models_list, 
     DatasetStates, 
     ModelConstants, 
     DataSetFactKeys,
@@ -76,7 +74,7 @@ class DataMasterCache(object):
         except DoesNotExist:
             return None
 
-    def get_or_create_dataset(self, name, path, metadata_path, project, calling_filename, timepath, file_extension, meta_args, previousfilereads):
+    def get_or_create_dataset(self, name, path, metadata_path, project, timepath, file_extension, meta_args):
         timepath = timepath or ''  # convert null to string empty.
         meta_args = self._combine_args(meta_args, file_extension)
 
@@ -94,11 +92,8 @@ class DataMasterCache(object):
             )
 
             params_to_update = {
-                DataSetFactKeys.CallingFilename: calling_filename, 
                 DataSetFactKeys.LocalPath: path, 
-                DataSetFactKeys.State: DatasetStates.LocalDeclared,
-                DataSetFactKeys.LocalMachine: socket.getfqdn(),
-                DataSetFactKeys.LocalUsername: getpass.getuser()
+                DataSetFactKeys.State: DatasetStates.LocalDeclared
             }
             if file_extension:
                 params_to_update[DataSetFactKeys.FileExtension] = file_extension
@@ -110,25 +105,15 @@ class DataMasterCache(object):
             else:
                 params_to_purge.append(DataSetFactKeys.MetaArgFileName)
 
-            if previousfilereads:
-                params_to_update[DataSetFactKeys.PreviousFileReads] = _serialize_filereads(previousfilereads)
-            else:
-                params_to_purge.append(DataSetFactKeys.PreviousFileReads)
-            
             self._set_facts(dataset, params_to_update, params_to_purge)
 
             dataset.last_modified_time = datetime.datetime.now()
             dataset.save()
 
         if meta_args:
-            dataset.update_metaargs(meta_args, metadata_path)
+            dataset.update_metaargs(meta_args)
 
         create_stale_syncs(dataset)
-
-        if calling_filename:
-            _, _, codecopy_filename = make_paths(dataset.name, dataset.project, timepath, file_extension, metaarg_guid)
-            self._cache_creating_file(dataset, calling_filename, codecopy_filename)
-            self._cache_git_info(dataset, calling_filename)
 
         return dataset  # Todo verify this thing has the facts set up.
 
@@ -190,34 +175,7 @@ class DataMasterCache(object):
             DataSetFactKeys.CallingFilenameContentHash: file_hash
         }
         self._set_facts(dataset, new_kwargs)
-
-    def _cache_git_info(self, dataset, creating_filename):
-        """ Get information about git root, git commit/branch, and git diff. Set as facts """
-        if not creating_filename or creating_filename == settings.cmdline_filename:
-            # remove teh keys this function sets.
-            keys_to_remove = [
-                DataSetFactKeys.GitRoot,
-                DataSetFactKeys.GitActiveBranch,
-                DataSetFactKeys.GitCommitHexSha,
-                DataSetFactKeys.GitCommitAuthor,
-                DataSetFactKeys.GitCommitAuthoredDatetime
-            ]
-            self._set_facts(dataset, {}, keys_to_remove)
-            return 
-
-        git_info = get_gitroot(creating_filename)
-        if not git_info:
-            return
-
-        new_kwargs = {
-            DataSetFactKeys.GitRoot: git_info['git_root'],
-            DataSetFactKeys.GitActiveBranch: git_info['active_branch'],
-            DataSetFactKeys.GitCommitHexSha: git_info['commit_hexsha'],
-            DataSetFactKeys.GitCommitAuthor: git_info['commit_author'],
-            DataSetFactKeys.GitCommitAuthoredDatetime: git_info['commit_authored_datetime']
-        }
-        self._set_facts(dataset, new_kwargs)
-        
+    
 
 def get_timepaths_for_dataset(dataset, limit=10):
     '''Identify all time paths in a dataset. Returns all of them if there are 10 or less. Returns min/max/count if more than 10.'''
@@ -230,11 +188,6 @@ def get_timepaths_for_dataset(dataset, limit=10):
     else:
         min_value, max_value = timepaths.select(fn.Min(DataSet.timepath), fn.Max(DataSet.timepath)).scalar(as_tuple=True)
         return {'cnt': total_records, 'min_value': min_value, 'max_value': max_value}
-
-
-def _serialize_filereads(datasets):
-    return ';'.join(d.guid for d in datasets)
-
 
 
 # runs on startup

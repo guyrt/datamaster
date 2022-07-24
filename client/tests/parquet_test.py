@@ -16,7 +16,7 @@ class ParquetTests(DMTestBase):
                        'three': [True, False, True]},
                        index=list('abc'))
         table = pa.Table.from_pandas(df)
-        pq.write_table(table, dm.out.parquettest.parquetsingle)
+        pq.write_table(table, dm.outputs.parquettest.parquetsingle)
 
         # read it back in
         table2 = pq.read_table(dm.inputs.parquettest.parquetsingle)
