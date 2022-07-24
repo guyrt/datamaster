@@ -81,7 +81,6 @@ class DataMasterCache(object):
 
         # need to prehash the metaargs.
         metaarg_guid = DataSet.hash_metaarg(meta_args)
-        import pdb; pdb.set_trace()
         with db.atomic():
             dataset, _ = DataSet.get_or_create(
                 name=name,

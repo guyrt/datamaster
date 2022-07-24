@@ -2,13 +2,11 @@ from typing import Any, Dict
 from peewee import Model, CharField, ForeignKeyField, IntegerField, TextField, DoesNotExist, DateTimeField, BooleanField
 from peewee import DatabaseProxy
 import json
-import os
 import hashlib
 import datetime
 import warnings
 
-from .filetools import make_folder
-from .settings import default_branch
+from .settings import settings
 
 db = DatabaseProxy()
 
@@ -197,4 +195,4 @@ models_list = (DataSet, DataSetFact, DataSetRemoteSync, Branch)
 
 def bootstrap_database(db_instance):
     db_instance.create_tables(models_list)
-    Branch.create(name=default_branch)
+    Branch.create(name=settings.active_branch)

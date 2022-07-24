@@ -57,8 +57,6 @@ def get_gitroot(full_path):
         return {}
     git_root = git_repo.working_tree_dir
     current_commit = git_repo.head.commit
-
-    import pdb; pdb.set_trace()
     
     # diffs:
 #    diffs = git_repo.index.diff(None)
