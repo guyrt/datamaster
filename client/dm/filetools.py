@@ -57,13 +57,19 @@ def get_gitroot(full_path):
         return {}
     git_root = git_repo.working_tree_dir
     current_commit = git_repo.head.commit
-    #difs = git_repo.index.diff(None)
-    # todo - compute diff for the calling file only.
+
+    import pdb; pdb.set_trace()
+    
+    # diffs:
+#    diffs = git_repo.index.diff(None)
+#    git_repo.untracked_files
+#    these will tell you what files have changed. then you need to grab copies. 
 
     return {
         'git_root': git_root,
         'active_branch': git_repo.active_branch.name,
         'commit_hexsha': current_commit.hexsha,
         'commit_author': current_commit.author,
-        'commit_authored_datetime': current_commit.authored_datetime
+        'commit_authored_datetime': current_commit.authored_datetime,
+        'diff': git_repo.git.diff()
     }

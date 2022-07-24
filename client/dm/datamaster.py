@@ -103,7 +103,7 @@ class MetadataWriter(object):
             },
             AuditKeys.GitCommitAuthoredDatetime: str(git_info['commit_authored_datetime'])
         }
-        import pdb; pdb.set_trace()
+
         return new_context
 
 

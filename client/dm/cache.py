@@ -3,6 +3,7 @@ import os
 import uuid
 import datetime
 
+
 from peewee import DoesNotExist, fn, SqliteDatabase
 
 from .filetools import copy_file
@@ -80,7 +81,7 @@ class DataMasterCache(object):
 
         # need to prehash the metaargs.
         metaarg_guid = DataSet.hash_metaarg(meta_args)
-
+        import pdb; pdb.set_trace()
         with db.atomic():
             dataset, _ = DataSet.get_or_create(
                 name=name,
