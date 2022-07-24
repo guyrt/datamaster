@@ -93,17 +93,13 @@ class DataMasterCache(object):
 
             params_to_update = {
                 DataSetFactKeys.LocalPath: path, 
-                DataSetFactKeys.State: DatasetStates.LocalDeclared
+                DataSetFactKeys.State: DatasetStates.LocalDeclared,
+                DataSetFactKeys.MetaArgFileName: metadata_path
             }
             if file_extension:
                 params_to_update[DataSetFactKeys.FileExtension] = file_extension
 
             params_to_purge = []
-
-            if meta_args:
-                params_to_update[DataSetFactKeys.MetaArgFileName] = metadata_path
-            else:
-                params_to_purge.append(DataSetFactKeys.MetaArgFileName)
 
             self._set_facts(dataset, params_to_update, params_to_purge)
 

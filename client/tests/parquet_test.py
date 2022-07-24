@@ -2,7 +2,6 @@ from .context import DMTestBase
 import unittest
 
 import dm
-from dm.models import DataSet
 
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -29,7 +28,7 @@ class ParquetTests(DMTestBase):
         df = pd.DataFrame({'r': np.random.rand(200000), 'p': [1] * 100000 + [2] * 100000})
         table = pa.Table.from_pandas(df)
         # Note! This requires that we pass in a string.
-        pq.write_to_dataset(table, root_path=str(dm.out.parquettest.parquetlarge), partition_cols=['p'])
+        pq.write_to_dataset(table, root_path=str(dm.outputs.parquettest.parquetlarge), partition_cols=['p'])
         # read it back in
         table2 = pq.read_table(dm.inputs.parquettest.parquetlarge)
         df2 = table2.to_pandas()

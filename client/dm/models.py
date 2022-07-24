@@ -77,7 +77,7 @@ class DataSet(Model):
     class Meta:
         database = db
         indexes = (
-            # Note the 4-part primary key for this object.
+            # Note the 5-part primary key for this object.
             (('branch', "project", 'name', 'metaarg_guid', 'timepath'), True),
         )
 

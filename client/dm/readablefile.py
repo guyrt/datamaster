@@ -103,6 +103,9 @@ class ReadableFileName(os.PathLike):
         global_event_handler.fire_fileread(self._dataset)
         return self._local_path
 
+    def __str__(self) -> str:
+        return self.__fspath__()
+
 
 class DataMasterInput(object):
     """
