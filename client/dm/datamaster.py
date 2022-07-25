@@ -1,13 +1,15 @@
-from dataclasses import dataclass
-import inspect
-import os
-import json
-import socket
 import getpass
+import inspect
+import json
+import os
+import socket
+import sys
+import logging
+from dataclasses import dataclass
 
 from .cache import cache
 from .events import global_event_handler
-from .filetools import make_folder, make_paths, get_clean_filename, get_gitroot
+from .filetools import get_clean_filename, get_gitroot, make_paths
 from .models import DataSet
 from .readablefile import inputs
 from .settings import settings
@@ -36,14 +38,19 @@ class AuditKeys(object):
     LocalUsername = 'localusername'
     MetaArgFileName = 'metaargfilename'
     PreviousFileReads = 'previousfilereads'
+    LoadedModules = 'loaded_modules'
+    PythonVersion = 'python_version'
     State = 'state'
 
     # Git facts
+    GitDetails = 'git'
     GitRoot = 'git_root'
     GitActiveBranch = 'git_active_branch'
     GitCommitHexSha = 'git_commit_hexsha'
     GitCommitAuthor = 'git_commit_author'
     GitCommitAuthoredDatetime = 'git_commit_authored_datetime'
+    GitDiff = 'git_diff'
+    GitUntracked = 'git_untracked'
 
     # Not stored in DB locally - used to send to server
     CodeCopyContent = 'code_copy_contents'
@@ -59,11 +66,13 @@ class MetadataWriter(object):
             AuditKeys.CallingFilename: writeable_file._calling_filename,
             AuditKeys.PreviousFileReads: self._serialize_filereads(global_event_handler.get_fileread()),
             AuditKeys.LocalMachine: socket.getfqdn(),
-            AuditKeys.LocalUsername: getpass.getuser()
+            AuditKeys.LocalUsername: getpass.getuser(),
+            AuditKeys.LoadedModules: self._get_loaded_modules(),
+            AuditKeys.PythonVersion: sys.version
         }
         if writeable_file._calling_filename:
-            context.update(self._cache_git_info(writeable_file._calling_filename))
-        
+            context[AuditKeys.GitRoot] = self._cache_git_info(writeable_file._calling_filename)
+
         data = {
             'dataset_name': output_path_details.dataset_name,
             'data_path': output_path_details.full_path,
@@ -101,10 +110,34 @@ class MetadataWriter(object):
                 'name': git_info['commit_author'].name,
                 'email': git_info['commit_author'].email
             },
-            AuditKeys.GitCommitAuthoredDatetime: str(git_info['commit_authored_datetime'])
+            AuditKeys.GitCommitAuthoredDatetime: str(git_info['commit_authored_datetime']),
+            AuditKeys.GitDiff: git_info['diff'],
+            AuditKeys.GitUntracked: git_info['untracked_files']
         }
 
         return new_context
+
+    def _get_loaded_modules(self):
+        import pkg_resources
+        # list versions installed
+        env = dict(tuple(str(ws).split()) for ws in pkg_resources.working_set)
+
+        # list import modules
+        module_keys = sys.modules.keys()
+
+        loaded_package_versions = {}  # module => current version
+
+        for module_key in sorted(module_keys):
+            key_parts = module_key.split('.')
+            for i in range(1, len(key_parts)):
+                key = '.'.join(key_parts[:i])
+                if key in loaded_package_versions:
+                    break
+                if key in env:
+                    loaded_package_versions[key] = env[key]
+                    break
+
+        return loaded_package_versions
 
 
 class WriteableFileName(os.PathLike):

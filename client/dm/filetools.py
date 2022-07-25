@@ -59,9 +59,10 @@ def get_gitroot(full_path):
     current_commit = git_repo.head.commit
     
     # diffs:
-#    diffs = git_repo.index.diff(None)
-#    git_repo.untracked_files
-#    these will tell you what files have changed. then you need to grab copies. 
+    untracked_files = {
+        k: open(os.path.join(git_root, k), 'r', encoding='ascii', errors='replace').read(1024 * 1024)  # read approx 1mb 
+        for k in git_repo.untracked_files
+    }
 
     return {
         'git_root': git_root,
@@ -69,5 +70,6 @@ def get_gitroot(full_path):
         'commit_hexsha': current_commit.hexsha,
         'commit_author': current_commit.author,
         'commit_authored_datetime': current_commit.authored_datetime,
-        'diff': git_repo.git.diff()
+        'diff': git_repo.git.diff(),
+        'untracked_files': untracked_files
     }

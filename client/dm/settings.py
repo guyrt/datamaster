@@ -148,7 +148,7 @@ class _Settings(object):
     # Credentials always flow from the user.
     local_credentials_file = os.path.join(user_path, 'remotes')
 
-    def __init__(self, file_name) -> None:
+    def __init__(self, file_name=None) -> None:
         self._file_name = file_name
         self._loaded = False
         self._start_loading = False
@@ -193,6 +193,9 @@ class _Settings(object):
         return s
 
     def _load(self):
+        if not self._file_name:
+            return
+
         self._start_loading = True
         fh = open(self._file_name, 'r')
         raw_dict = yaml.full_load(fh)
