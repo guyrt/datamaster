@@ -75,6 +75,62 @@ it was created:
 
 DataMaster figures out where ``ages`` is stored and passes the correct file to python.
 
+**Discovering your data**
+
+DM does everything it can to help you discover data sets locally.
+Tab complete works as expected.
+
+.. code-block:: python
+
+    >>> from dm import inputs
+    >>> inputs. [tab]
+    inputs.bar(      inputs.foo(      inputs.myproject inputs.withtime
+
+Docstrings work as expected:
+
+    >>> from dm import inputs
+    >>> ?inputs.myproject
+    Type:        ReadableProject
+    String form: Project myproject
+    File:        [omitted]\datamaster\client\dm\readablefile.py
+    Docstring:
+    Datamaster Project myproject
+
+    Files:
+    outputone
+    outputtwo
+    Projects:
+    innerproject
+
+    >>> ?inputs.myproject.weights
+    In [5]: ?inputs.withtime.model
+    Signature:   inputs.myproject.model(extension=None, meta=None, timepath='')
+    Type:        ReadableFileName
+    String form: Dataset myproject.model at ~\.datamaster\data\master\withtime\model\2019\11\04\model
+    File:        [omitted]\datamaster\client\dm\readablefile.py
+    Docstring:
+    DataSet stored at ~\.datamaster\data\master\withtime\model\2019\11\04\model
+
+    Branch: master
+
+
+
+In addition, you can list datasets with the command line utility:
+
+.. code-block:: bash
+
+    $ dm list
+    <todo>
+
+You can call `dm list` with a dataset name to see full details:
+
+.. code-block:: bash
+
+    $ dm list example
+    <todo>
+
+
+While autocomplete works already from Jupyter, integration with VSCode and PyCharm is coming.
 
 **Controlling the output with additional data**
 
@@ -133,17 +189,31 @@ Many data sets have a partition scheme based on date or other factors. Datamaste
 
 1) Explicitly add partition information using plus:
 
+.. code-block:: python
+
     from dm import outputs
     data = 'this is my data'
     open(outputs.myproject.dailydata + 'year=2022/month=12/day=25', 'w').write()
 
+1) Explicitly add partition information using a function call:
+
+.. code-block:: python
+
+    from dm import outputs
+    data = 'this is my data'
+    open(outputs.myproject.dailydata(timepath='year=2022/month=12/day=25', 'w').write()
+
 2) Let an external system handle it:
 
+.. code-block:: python
+    
     from dm import outputs
     from pyarrow import parquet
 
     data = '' # data with a partition key
     pq.write_to_dataset(table, root_path=str(outputs.myproject.dailydata(meta=meta_args)), partition_cols=['p'])
+
+In either case, the dataset tracks the "root" folder `dailydata` which has growing partitions.  
 
 
 **Everything else we save: data metadata**
@@ -203,62 +273,6 @@ Here's an example:
         }
     }
 
-**Discovering your data**
-
-DM does everything it can to help you discover data sets locally.
-Tab complete works as expected.
-
-.. code-block:: python
-
-    >>> from dm import inputs
-    >>> inputs. [tab]
-    inputs.bar(      inputs.foo(      inputs.myproject inputs.withtime
-
-Docstrings work as expected:
-
-    >>> from dm import inputs
-    >>> ?inputs.myproject
-    Type:        ReadableProject
-    String form: Project myproject
-    File:        [omitted]\datamaster\client\dm\readablefile.py
-    Docstring:
-    Datamaster Project myproject
-
-    Files:
-    outputone
-    outputtwo
-    Projects:
-    innerproject
-
-    >>> ?inputs.myproject.weights
-    In [5]: ?inputs.withtime.model
-    Signature:   inputs.myproject.model(extension=None, meta=None, timepath='')
-    Type:        ReadableFileName
-    String form: Dataset myproject.model at ~\.datamaster\data\master\withtime\model\2019\11\04\model
-    File:        [omitted]\datamaster\client\dm\readablefile.py
-    Docstring:
-    DataSet stored at ~\.datamaster\data\master\withtime\model\2019\11\04\model
-
-    Branch: master
-
-
-
-In addition, you can list datasets with the command line utility:
-
-.. code-block:: bash
-
-    $ dm list
-    <todo>
-
-You can call `dm list` with a dataset name to see full details:
-
-.. code-block:: bash
-
-    $ dm list example
-    <todo>
-
-
-While autocomplete works already from Jupyter, integration with VSCode and PyCharm is coming.
 
 
 
