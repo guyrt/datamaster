@@ -220,6 +220,9 @@ class WriteableFileName(os.PathLike):
         inputs._reset()
         return path_data.full_path
 
+    def __add__(self, other: str) -> str:
+        return os.path.join(str(self), other)
+
 
 class DataMasterOutput(object):
     """
