@@ -129,14 +129,21 @@ While DM still controls where the file goes, we will append ".pt".
 
 .. code-block:: python
 
-Many data sets have a partition scheme. Datamaster supports writing to partition schemes. You can write to partitions in a few ways, all of which result in the same thing to DataMaster:
+Many data sets have a partition scheme based on date or other factors. Datamaster supports writing to partition schemes. You can write to partitions two few ways, all of which result in the same thing to DataMaster:
 
-1) Let DM handle it:
+1) Explicitly add partition information using plus:
 
     from dm import outputs
-    from pyarrow import parquet as pq
+    data = 'this is my data'
+    open(outputs.myproject.dailydata + 'year=2022/month=12/day=25', 'w').write()
 
 2) Let an external system handle it:
+
+    from dm import outputs
+    from pyarrow import parquet
+
+    data = '' # data with a partition key
+    pq.write_to_dataset(table, root_path=str(outputs.myproject.dailydata(meta=meta_args)), partition_cols=['p'])
 
 
 **Everything else we save: data metadata**

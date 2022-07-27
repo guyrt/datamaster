@@ -10,8 +10,8 @@ import datetime
 
 
 # two examples (times metadata)
-# 1 - partitions no time path
-# 2 - what's in master where we do the paths
+# 1 - write partitions using pyarrrow
+# 2 - explicit partitions using addition
 
 
 def write_days(dates, meta_args=None):
