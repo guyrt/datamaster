@@ -1,0 +1,3 @@
+# For testing
+pyarrow
+pandas>=1.3

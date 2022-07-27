@@ -1,5 +1,5 @@
 import os
-from .cache import cache, get_timepaths_for_dataset
+from .cache import cache
 from .models import DataSet, ModelConstants
 from .events import global_event_handler
 
@@ -45,7 +45,6 @@ class ReadableFileName(os.PathLike):
 
     def _set_info_from_model(self, dataset):
         self._dataset = dataset
-        self._timepath = dataset.timepath
         self._name = dataset.name
         self._project = dataset.project
         self._branch = dataset.branch
@@ -58,24 +57,15 @@ class ReadableFileName(os.PathLike):
     @property
     def __doc__(self):
         metaargs = self._dataset.get_metaargs_str()
-        timestamp_info = get_timepaths_for_dataset(self._dataset)
         branch_name = self._branch.name
-        if 'allpaths' in timestamp_info:
-            timestamp_string = '\n'.join(['* ' + ts if ts == self._timepath else ts for ts in timestamp_info['allpaths'] if ts])
-        else:
-            timestamp_string = "{cnt} total values\nMin: {min_value}\nMax: {max_value}".format(**timestamp_string)
-        
         header = "DataSet stored at {0}".format(self._local_path)
 
         branch_section = "Branch: {0}".format(branch_name)
-        timestamp_section = ''
-        if timestamp_string:
-            timestamp_section = "Timepaths: \n{0}".format(timestamp_string)
         metaargs_section = ''
         if metaargs:
             metaargs_section = "Metaargs: \n{0}".format(metaargs)
         
-        args = [header, ' ', branch_section, timestamp_section, metaargs_section]
+        args = [header, ' ', branch_section, metaargs_section]
         return '\n'.join([a for a in args if a])
 
     @property
@@ -86,9 +76,8 @@ class ReadableFileName(os.PathLike):
     def metaargs(self):
         return self._dataset.load_metaargs()
 
-    def __call__(self, extension=None, meta=None, timepath=''):
-        timepath = timepath or self._timepath
-        new_dataset = cache.get_dataset_by_args(self._dataset, extension, meta, timepath)
+    def __call__(self, extension=None, meta=None):
+        new_dataset = cache.get_dataset_by_args(self._dataset, extension, meta)
         if not new_dataset:
             raise ValueError("No dataset found for arguments")
         if new_dataset.id == self._dataset.id:
@@ -102,6 +91,12 @@ class ReadableFileName(os.PathLike):
         # eventually this will need to ensure the file is local.
         global_event_handler.fire_fileread(self._dataset)
         return self._local_path
+
+    def __str__(self) -> str:
+        return self.__fspath__()
+
+    def __add__(self, other : str) -> str:
+        return os.path.join(str(self), other)
 
 
 class DataMasterInput(object):

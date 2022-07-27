@@ -12,8 +12,8 @@ f.write("[]")
 f.close()
 
 # Write a file as part of a project
-# This should be written to root/myproject/output1.txt
-f = open(outputs.myproject.outputone, 'w')
+# This should be written to root/myproject/outputone.txt
+f = open(outputs.myproject.outputone(extension='txt'), 'w')
 f.write("projectoutput")
 f.close()
 
