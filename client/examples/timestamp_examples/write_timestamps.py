@@ -9,13 +9,20 @@ import random
 import datetime
 
 
+# two examples (times metadata)
+# 1 - write partitions using pyarrrow
+# 2 - explicit partitions using addition
+
+
 def write_days(dates, meta_args=None):
     for date in dates:
         datetime_converted = datetime.datetime.strptime(date, 'year=%Y/month=%m/day=%d')
         data = {
             'timestamp': [str(datetime_converted + datetime.timedelta(seconds=random.randint(0, 60 * 60 * 24))) for i in range(100)],
             'event': [random.choice(['start', 'continue', 'quit']) for i in range(100)],
-            'p': [random.choice(['a', 'b']) for i in range(100)]
+            'year': [str(datetime_converted.year) for i in range(100)],
+            'month': [str(datetime_converted.month) for i in range(100)],
+            'day': [str(datetime_converted.day) for i in range(100)]
         }
         
         df = pd.DataFrame(data)

@@ -125,6 +125,84 @@ You can do that by augmenting the dataset:
 
 While DM still controls where the file goes, we will append ".pt".
 
+**Data with time ranges**
+
+.. code-block:: python
+
+Many data sets have a partition scheme based on date or other factors. Datamaster supports writing to partition schemes. You can write to partitions two few ways, all of which result in the same thing to DataMaster:
+
+1) Explicitly add partition information using plus:
+
+    from dm import outputs
+    data = 'this is my data'
+    open(outputs.myproject.dailydata + 'year=2022/month=12/day=25', 'w').write()
+
+2) Let an external system handle it:
+
+    from dm import outputs
+    from pyarrow import parquet
+
+    data = '' # data with a partition key
+    pq.write_to_dataset(table, root_path=str(outputs.myproject.dailydata(meta=meta_args)), partition_cols=['p'])
+
+
+**Everything else we save: data metadata**
+
+Every dataset creates a metadata folder that tracks everything we can think of for the environment where you read. Specifics we track are:
+
+* machine and user info
+* data that was read (if it was read with datamaster!)
+* loaded modules and their versions
+* python version
+* git info including latest commit, branch, and a diff showing any changes.
+
+Our goal is for this data to list everything you would need to comply with model/data provenance regulations.
+
+Here's an example:
+
+
+    {
+        "branch": "master",
+        "context": {
+            "calling_filename": "C:\\Users\\riguy\\code\\datamaster\\client\\sample_filewrite.py",
+            "git_root": {
+            "git_active_branch": "datamodel",
+            "git_commit_author": {
+                "email": "riguy@microsoft.com",
+                "name": "Tommy Guy"
+            },
+            "git_commit_authored_datetime": "2022-07-25 15:21:29-07:00",
+            "git_commit_hexsha": "e0fbed609dac786ab91486adad7a188d53acfa1e",
+            "git_diff": "diff --git a/client/sample_filewrite.py b/client/sample_filewrite.py\nindex ca68f30..27a19e6 100644\n--- a/client/sample_filewrite.py\n+++ b/client/sample_filewrite.py\n@@ -12,8 +12,8 @@ f.write(\"[]\")\n f.close()\n \n # Write a file as part of a project\n-# This should be written to root/myproject/output1.txt\n-f = open(outputs.myproject.outputone, 'w')\n+# This should be written to root/myproject/outputone.txt\n+f = open(outputs.myproject.outputone(extension='.txt'), 'w')\n f.write(\"projectoutput\")\n f.close()\n ",
+            "git_root": "C:\\Users\\riguy\\code\\datamaster",
+            "git_untracked": {
+                "client/dm/test.txt": "hi there"
+            }
+            },
+            "loaded_modules": {
+            "certifi": "2020.6.20",
+            "chardet": "3.0.4",
+            "gitdb": "4.0.7",
+            "idna": "2.10",
+            "requests": "2.24.0",
+            "smmap": "4.0.0",
+            "urllib3": "1.25.9"
+            },
+            "localmachine": "RIGUYLAPPY4",
+            "localusername": "riguy",
+            "previousfilereads": [],
+            "python_version": "3.8.3 (default, Jul  2 2020, 17:30:36) [MSC v.1916 64 bit (AMD64)]"
+        },
+        "data_path": "C:\\Users\\riguy\\.datamaster\\data\\master\\myproject\\outputone..txt",
+        "dataset_name": "outputone",
+        "project": "myproject",
+        "writeable_file_data": {
+            "file_suffix": ".txt",
+            "passed_metadata": {},
+            "time_path": null
+        }
+    }
+
 **Discovering your data**
 
 DM does everything it can to help you discover data sets locally.
@@ -162,9 +240,7 @@ Docstrings work as expected:
     DataSet stored at ~\.datamaster\data\master\withtime\model\2019\11\04\model
 
     Branch: master
-    Timepaths:
-    2019/11/03
-    * 2019/11/04
+
 
 
 In addition, you can list datasets with the command line utility:
@@ -194,3 +270,4 @@ While autocomplete works already from Jupyter, integration with VSCode and PyCha
 
 **Branching**
 
+explain that it's useful for keeping some work local if/when we do merge upstream.
