@@ -65,7 +65,6 @@ class DataSet(Model):
     name = CharField(max_length=512)
     project = CharField(max_length=512)
     metaarg_guid = CharField(max_length=64)
-    timepath = CharField(max_length=64, default='')
     branch = ForeignKeyField(Branch, backref='datasets', field='name')
 
     guid = CharField(max_length=64, unique=True)
@@ -78,7 +77,7 @@ class DataSet(Model):
         database = db
         indexes = (
             # Note the 5-part primary key for this object.
-            (('branch', "project", 'name', 'metaarg_guid', 'timepath'), True),
+            (('branch', "project", 'name', 'metaarg_guid'), True),
         )
 
     def __repr__(self):

@@ -1,5 +1,9 @@
 # datamaster
 
+Install Locally
+---------------
+
+`python -m pip install -e . --no-build-isolation --no-use-pep517`
 
 Uploading
 ---------

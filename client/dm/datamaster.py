@@ -80,7 +80,6 @@ class MetadataWriter(object):
             'branch': settings.active_branch,
             'writeable_file_data': {
                 'passed_metadata': writeable_file._metaargs,
-                'time_path': writeable_file._time_path,
                 'file_suffix': writeable_file._file_suffix
             },
             'context': context
@@ -147,7 +146,7 @@ class WriteableFileName(os.PathLike):
         self._file_suffix = None
         self._metaargs = {}  # These can be used to version.
         self._is_project = False  # True iff this is not a file.
-        self._time_path = None # Allows one to specify a path with timestamps.
+        self._timesuffix = None # Used to add text that isn't tracked as new entity
 
         if type(name) == str:
             self._name = [name]
@@ -156,15 +155,17 @@ class WriteableFileName(os.PathLike):
 
         self._calling_filename = calling_filename
 
-    def __call__(self, extension=None, timepath=None, meta=None):
-        if extension:
+    def __call__(self, extension=None, meta=None, timepath=None):
+        if extension is not None:
             self._file_suffix = extension
-        if meta:
+        if meta is not None:
             self._metaargs = meta
-        if timepath:
-            if timepath[0] == '/':
-                raise ValueError("Time paths cannot be absolute paths.")
-            self._time_path = timepath
+        if timepath is not None:
+            self._timesuffix = timepath
+
+        if extension is not None and timepath is not None:
+            raise ValueError("Unexpected inputs: extension and timepath can't be passed at same time.")
+
         return self
 
     def _set_internal_attributes(self, parent):
@@ -189,7 +190,7 @@ class WriteableFileName(os.PathLike):
         datasetname = self._name[-1]
         project = '.'.join(self._name[:-1])
         hashed_metaargs = DataSet.hash_metaarg(self._metaargs)
-        full_path, metadata_path = make_paths(datasetname, project, self._time_path, self._file_suffix, hashed_metaargs)
+        full_path, metadata_path = make_paths(datasetname, project, self._file_suffix, hashed_metaargs, self._timesuffix)
         return OutputPath(full_path, metadata_path, datasetname, project)
 
     def __fspath__(self) -> str:
@@ -207,7 +208,6 @@ class WriteableFileName(os.PathLike):
             path_data.full_path,
             path_data.metadata_path,
             path_data.project,
-            self._time_path,
             self._file_suffix,
             self._metaargs
         )

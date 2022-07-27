@@ -64,9 +64,9 @@ class InputTests(DMTestBase):
         default_path = dm.inputs.f1().__fspath__()
         self.assertIn('04', default_path)
 
-        path_02 = dm.inputs.f1(timepath='2020/01/04').__fspath__()
+        path_02 = dm.inputs.f1 + '2020/01/04'
         self.assertIn('04', path_02)
-        path_01 = dm.inputs.f1(timepath='2020/01/03').__fspath__()
+        path_01 = dm.inputs.f1() + '2020/01/03'
         self.assertIn('03', path_01)
 
 

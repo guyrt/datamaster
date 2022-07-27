@@ -48,18 +48,18 @@ class DataMasterCache(object):
     def get_dataset_byname(self, name):
         return DataSet.get(DataSet.name == name)
 
-    def get_dataset_by_args(self, dataset, file_extension, meta_args, timepath):
+    def get_dataset_by_args(self, dataset, file_extension, meta_args):
         """ Look up a dataset in same family but with a different file extension and/or metaargs 
         Should maintain branch of the dataset.
         """
         meta_args = self._combine_args(meta_args, file_extension)
         metaarg_guid = DataSet.hash_metaarg(meta_args)
         try:
-            return DataSet.get(name=dataset.name, project=dataset.project, timepath=timepath, metaarg_guid=metaarg_guid, branch=dataset.branch)
+            return DataSet.get(name=dataset.name, project=dataset.project, metaarg_guid=metaarg_guid, branch=dataset.branch)
         except DoesNotExist:
             return None
 
-    def get_dataset_by_kwargs(self, name, project, branch, timepath, metaargs_guid, **kwargs):
+    def get_dataset_by_kwargs(self, name, project, branch, metaargs_guid, **kwargs):
         """
         Convenience function to find a dataset based on kwargs.
 
@@ -70,13 +70,11 @@ class DataMasterCache(object):
                 name=name,
                 project=project,
                 branch=branch,
-                timepath=timepath,
                 metaarg_guid=metaargs_guid)
         except DoesNotExist:
             return None
 
-    def get_or_create_dataset(self, name, path, metadata_path, project, timepath, file_extension, meta_args):
-        timepath = timepath or ''  # convert null to string empty.
+    def get_or_create_dataset(self, name, path, metadata_path, project, file_extension, meta_args):
         meta_args = self._combine_args(meta_args, file_extension)
 
         # need to prehash the metaargs.
@@ -86,7 +84,6 @@ class DataMasterCache(object):
                 name=name,
                 project=project,
                 metaarg_guid=metaarg_guid,
-                timepath=timepath,
                 branch=settings.active_branch,
                 defaults={'guid': uuid.uuid4()}
             )
@@ -171,19 +168,6 @@ class DataMasterCache(object):
             DataSetFactKeys.CallingFilenameContentHash: file_hash
         }
         self._set_facts(dataset, new_kwargs)
-    
-
-def get_timepaths_for_dataset(dataset, limit=10):
-    '''Identify all time paths in a dataset. Returns all of them if there are 10 or less. Returns min/max/count if more than 10.'''
-    all_paths = DataSet.select().where(DataSet.name==dataset.name, DataSet.project==dataset.project, DataSet.metaarg_guid==dataset.metaarg_guid)
-    total_records = all_paths.count()
-    if total_records < limit:
-        timepaths = list(all_paths.order_by(DataSet.timepath).select(DataSet.timepath).tuples())
-        timepaths = [t[0] for t in timepaths]
-        return {'allpaths': timepaths}
-    else:
-        min_value, max_value = timepaths.select(fn.Min(DataSet.timepath), fn.Max(DataSet.timepath)).scalar(as_tuple=True)
-        return {'cnt': total_records, 'min_value': min_value, 'max_value': max_value}
 
 
 # runs on startup

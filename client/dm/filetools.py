@@ -14,15 +14,12 @@ def make_folder(full_path):
         os.makedirs(path_part)
     
 
-def make_paths(datasetname, project, timepath, filesuffix, hashed_metaargs):
-    file_name_parts = datasetname
-
-    if timepath:
-        filename = os.path.join(file_name_parts, timepath, datasetname)
-    else:
-        filename = file_name_parts
+def make_paths(datasetname, project, filesuffix, hashed_metaargs, time_suffix):
+    filename = datasetname
     if filesuffix:
         filename += "." + filesuffix
+    if time_suffix:
+        filename = os.path.join(filename, time_suffix)
 
     relative_path = os.path.join(settings.active_branch, os.path.join(project), hashed_metaargs, filename)
     full_path = os.path.join(settings.fileroot, relative_path)

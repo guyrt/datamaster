@@ -30,7 +30,7 @@ class OutputTests(DMTestBase):
         self.assertEqual(0, dataset.last_server_version)
         git_patch.assert_called()
         context_output = json.loads(open(dataset.get_metadata_filename(), 'r').read())
-        self.assertTrue(context_output['context']['git_called'])
+        self.assertTrue(context_output['context']['git_root']['git_called'])
 
     def test_create_file_with_extension(self):
         file_path = dm.outputs.testfile(extension='json').__fspath__()
@@ -47,50 +47,50 @@ class OutputTests(DMTestBase):
     def test_create_file_with_timefield(self):
         file_path = dm.outputs.testfile(timepath='2019/11/03').__fspath__()
         file_path = file_path.replace('\\', '/')
-        self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile'))
+        self.assertTrue(file_path.endswith('testfile/2019/11/03'))
         
         self.state_check()
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "")
         self.assertEqual(dataset.branch.name, "master")
-        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-20:], '/2019/11/03/testfile')
+        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-10:], '2019/11/03')
 
     def test_create_file_with_timefield_extra_slash(self):
         file_path = dm.outputs.testfile(timepath='2019/11/03/').__fspath__()
         file_path = file_path.replace('\\', '/')
-        self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile'))
+        self.assertTrue(file_path.endswith('testfile/2019/11/03'))
 
         self.state_check()
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "")
         self.assertEqual(dataset.branch.name, "master")
-        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-20:], '/2019/11/03/testfile')
+        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-10:], '2019/11/03')
 
     def test_create_file_with_timefield_and_project(self):
-        file_path = dm.outputs.project.testfile(timepath='2019/11/03', extension='json').__fspath__()
+        file_path = dm.outputs.project.testfile(timepath='2019/11/03').__fspath__()
         file_path = file_path.replace('\\', '/')
-        self.assertTrue(file_path.endswith('project/testfile/2019/11/03/testfile.json'))
+        self.assertTrue(file_path.endswith('project/testfile/2019/11/03'))
         
         self.state_check()
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "project")
         self.assertEqual(dataset.branch.name, "master")
-        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-25:], '/2019/11/03/testfile.json')
+        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-10:], '2019/11/03')
 
     def test_create_file_with_timefield_and_filetype(self):
-        file_path = dm.outputs.testfile(timepath='2019/11/03', extension='json').__fspath__()
+        file_path = dm.outputs.testfile(timepath='2019/11/03').__fspath__()
         file_path = file_path.replace('\\', '/')
-        self.assertTrue(file_path.endswith('testfile/2019/11/03/testfile.json'))
+        self.assertTrue(file_path.endswith('testfile/2019/11/03'))
         
         self.state_check()
         dataset = DataSet.get()
         self.assertEqual(dataset.name, "testfile")
         self.assertEqual(dataset.project, "")
         self.assertEqual(dataset.branch.name, "master")
-        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-25:], '/2019/11/03/testfile.json')
+        self.assertEqual(dataset.get_fact('localpath').replace('\\', '/')[-10:], '2019/11/03')
 
     def test_create_twofiles_with_formats(self):
         file_path_json = dm.outputs.testfile(extension='json').__fspath__()
